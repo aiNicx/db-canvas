@@ -12,6 +12,8 @@ import ReactFlow, {
   addEdge,
   ConnectionLineType,
   Connection,
+  EdgeTypes,
+  getBezierPath,
 } from "reactflow";
 import { Project, TableNode, Connection as DBConnection } from "@/types/schema";
 import { TableNodeComponent } from "./TableNodeComponent";
@@ -25,8 +27,53 @@ interface DBCanvasProps {
   onEditTable?: (tableId: string) => void;
 }
 
+// Custom edge to replace the missing "floating" edge type
+const FloatingEdge = ({
+  id,
+  source,
+  target,
+  sourceX,
+  sourceY,
+  targetX,
+  targetY,
+  sourcePosition,
+  targetPosition,
+  style = {},
+  data,
+  markerEnd,
+}) => {
+  const [edgePath] = getBezierPath({
+    sourceX,
+    sourceY,
+    sourcePosition,
+    targetX,
+    targetY,
+    targetPosition,
+  });
+
+  return (
+    <path
+      id={id}
+      style={{
+        ...style,
+        strokeWidth: 2,
+        stroke: 'hsl(var(--primary))',
+        strokeDasharray: data?.relationshipType === "oneToMany" ? "5 5" : undefined,
+      }}
+      className="react-flow__edge-path"
+      d={edgePath}
+      markerEnd={markerEnd}
+    />
+  );
+};
+
 const nodeTypes = {
   table: TableNodeComponent,
+};
+
+// Define edge types
+const edgeTypes: EdgeTypes = {
+  floating: FloatingEdge,
 };
 
 export function DBCanvas({ project, showGrid, onEditTable }: DBCanvasProps) {
@@ -59,7 +106,6 @@ export function DBCanvas({ project, showGrid, onEditTable }: DBCanvasProps) {
         targetHandle: connection.targetField,
         type: "floating",
         animated: true,
-        style: { stroke: "hsl(var(--primary))" },
         data: {
           relationshipType: connection.relationshipType,
         },
@@ -86,7 +132,9 @@ export function DBCanvas({ project, showGrid, onEditTable }: DBCanvasProps) {
             ...params,
             type: "floating",
             animated: true,
-            style: { stroke: "hsl(var(--primary))" },
+            data: {
+              relationshipType: "oneToMany", // Default relationship type
+            },
           },
           eds
         )
@@ -177,6 +225,7 @@ export function DBCanvas({ project, showGrid, onEditTable }: DBCanvasProps) {
         onConnect={onConnect}
         onNodeDragStop={onNodeDragStop}
         nodeTypes={nodeTypes}
+        edgeTypes={edgeTypes}
         connectionLineType={ConnectionLineType.Bezier}
         defaultViewport={{ x: 0, y: 0, zoom: 1 }}
         minZoom={0.1}

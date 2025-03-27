@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/select";
 import { useProject } from "@/contexts/ProjectContext";
 import { toast } from "sonner";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 interface EditTableDialogProps {
   open: boolean;
@@ -42,6 +43,16 @@ const DATA_TYPES = [
   "DOUBLE",
 ];
 
+const TABLE_COLORS = [
+  { name: "Default", value: "" },
+  { name: "Blue", value: "blue" },
+  { name: "Red", value: "red" },
+  { name: "Green", value: "green" },
+  { name: "Purple", value: "purple" },
+  { name: "Amber", value: "amber" },
+  { name: "Pink", value: "pink" },
+];
+
 export function EditTableDialog({
   open,
   onOpenChange,
@@ -49,12 +60,14 @@ export function EditTableDialog({
 }: EditTableDialogProps) {
   const { updateTable } = useProject();
   const [tableName, setTableName] = useState(table.name);
+  const [tableColor, setTableColor] = useState(table.color || "");
   const [fields, setFields] = useState<Omit<Field, "foreignKey">[]>([]);
 
   // Initialize the form with the table data when it changes
   useEffect(() => {
     if (table) {
       setTableName(table.name);
+      setTableColor(table.color || "");
       
       // We need to exclude foreignKey property for our form
       const formFields = table.fields.map(field => {
@@ -118,10 +131,11 @@ export function EditTableDialog({
       };
     });
 
-    // Update the table
+    // Update the table with the new color
     updateTable({
       ...table,
       name: tableName,
+      color: tableColor,
       fields: updatedFields,
     });
 
@@ -135,7 +149,7 @@ export function EditTableDialog({
         <DialogHeader>
           <DialogTitle>Edit Table</DialogTitle>
           <DialogDescription>
-            Update table structure. Changes will be saved to your project.
+            Update table structure and appearance. Changes will be saved to your project.
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
@@ -148,6 +162,27 @@ export function EditTableDialog({
               placeholder="Enter table name"
             />
           </div>
+          
+          <div className="grid gap-2">
+            <Label>Table Color</Label>
+            <RadioGroup 
+              value={tableColor} 
+              onValueChange={setTableColor}
+              className="flex flex-wrap gap-2"
+            >
+              {TABLE_COLORS.map((color) => (
+                <div key={color.value} className="flex items-center space-x-2">
+                  <RadioGroupItem 
+                    value={color.value} 
+                    id={`color-${color.value || 'default'}`}
+                    className={color.value ? `bg-${color.value}-500 border-${color.value}-500` : ''}
+                  />
+                  <Label htmlFor={`color-${color.value || 'default'}`}>{color.name}</Label>
+                </div>
+              ))}
+            </RadioGroup>
+          </div>
+          
           <div className="space-y-4">
             <div className="flex justify-between items-center">
               <Label>Fields</Label>

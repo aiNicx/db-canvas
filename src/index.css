@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -36,6 +37,31 @@
 
     --canvas-background: 210 40% 98%;
     --canvas-grid: 220 13% 91%;
+    
+    /* Table color variables */
+    --blue: #3b82f6;
+    --blue-50: #eff6ff;
+    --blue-950: #172554;
+    
+    --red: #ef4444;
+    --red-50: #fef2f2;
+    --red-950: #450a0a;
+    
+    --green: #22c55e;
+    --green-50: #f0fdf4;
+    --green-950: #052e16;
+    
+    --amber: #f59e0b;
+    --amber-50: #fffbeb;
+    --amber-950: #451a03;
+    
+    --purple: #a855f7;
+    --purple-50: #faf5ff;
+    --purple-950: #3b0764;
+    
+    --pink: #ec4899;
+    --pink-50: #fdf2f8;
+    --pink-950: #500724;
   }
  
   .dark {
@@ -83,10 +109,10 @@
 
 /* ReactFlow custom styling */
 .table-node {
-  min-width: 200px;
+  min-width: 220px;
   border-radius: 8px;
   overflow: hidden;
-  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  box-shadow: 0 4px 15px -1px rgb(0 0 0 / 0.2), 0 2px 10px -2px rgb(0 0 0 / 0.2);
 }
 
 .table-node-header {
@@ -102,7 +128,7 @@
 .field-row {
   display: flex;
   align-items: center;
-  padding: 8px 12px;
+  padding: 10px 12px;
   position: relative;
   line-height: 1.2;
 }
@@ -131,64 +157,18 @@
 }
 
 .connection-handle {
-  width: 8px !important;
-  height: 8px !important;
-  min-width: 8px !important;
-  min-height: 8px !important;
+  width: 10px !important;
+  height: 10px !important;
+  min-width: 10px !important;
+  min-height: 10px !important;
   border-radius: 50% !important;
   transition: all 0.2s ease;
+  opacity: 0.8;
 }
 
 .connection-handle:hover {
   transform: scale(1.5);
-}
-
-/* Define color variables for table themes */
-:root {
-  /* Add theme colors for tables */
-  --blue: rgb(219, 234, 254);
-  --blue-50: rgb(239, 246, 255);
-  --blue-950: rgb(23, 37, 84);
-  
-  --red: rgb(254, 226, 226);
-  --red-50: rgb(254, 242, 242);
-  --red-950: rgb(69, 10, 10);
-  
-  --green: rgb(220, 252, 231);
-  --green-50: rgb(240, 253, 244);
-  --green-950: rgb(5, 46, 22);
-  
-  --amber: rgb(254, 243, 199);
-  --amber-50: rgb(255, 251, 235);
-  --amber-950: rgb(69, 26, 3);
-  
-  --purple: rgb(243, 232, 255);
-  --purple-50: rgb(250, 245, 255);
-  --purple-950: rgb(59, 7, 100);
-  
-  --pink: rgb(252, 231, 243);
-  --pink-50: rgb(253, 242, 248);
-  --pink-950: rgb(80, 7, 36);
-}
-
-/* Dark mode adjustments */
-.dark .table-node-content {
-  color: rgb(229, 231, 235);
-}
-
-.dark .field-type {
-  background-color: rgba(17, 24, 39, 0.5);
-  color: rgb(209, 213, 219);
-}
-
-/* Fixes for ReactFlow in dark mode */
-.dark .react-flow__attribution {
-  color: hsl(var(--foreground));
-  background-color: transparent;
-}
-
-.dark .react-flow__minimap {
-  background-color: hsl(var(--card));
+  opacity: 1;
 }
 
 /* Animation */

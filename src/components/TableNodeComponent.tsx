@@ -2,7 +2,7 @@
 import { memo } from "react";
 import { Handle, Position } from "reactflow";
 import { TableNode, Field } from "@/types/schema";
-import { KeyRound, Key, Edit, Link } from "lucide-react";
+import { KeyRound, Link, Edit } from "lucide-react";
 
 interface TableNodeProps {
   data: TableNode;
@@ -13,10 +13,10 @@ interface TableNodeProps {
 export const TableNodeComponent = memo(({ data, selected, onEdit }: TableNodeProps) => {
   const { name, fields, color } = data;
   
-  // Use the custom color from the table data, or default to the theme color
-  const headerBgColor = color ? color : "bg-muted";
-  const cardBgColor = color ? `bg-${color}-50 dark:bg-${color}-950` : "bg-card";
-
+  // Define custom styling based on the table color
+  const headerBgColor = color || "bg-slate-800 dark:bg-slate-800";
+  const cardBgColor = color ? `bg-${color}-50 dark:bg-${color}-950` : "bg-black dark:bg-slate-900";
+  
   const handleEditClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (onEdit) {
@@ -26,55 +26,66 @@ export const TableNodeComponent = memo(({ data, selected, onEdit }: TableNodePro
 
   return (
     <div 
-      className={`table-node ${selected ? 'border-primary border-2' : 'border border-border'}`}
+      className={`table-node rounded-lg overflow-hidden ${selected ? 'ring-2 ring-primary' : 'ring-1 ring-slate-700'}`}
       style={{ backgroundColor: color ? `var(--${color})` : undefined }}
     >
-      <div className={`table-node-header ${headerBgColor} p-2 font-medium border-b text-center relative`}>
-        {name}
+      {/* Table Header */}
+      <div 
+        className={`${headerBgColor} p-3 font-medium text-white flex justify-between items-center`}
+        style={{ backgroundColor: color ? undefined : "#1e293b" }}
+      >
+        <span className="truncate text-base">{name}</span>
         <button 
           onClick={handleEditClick}
-          className="absolute right-2 top-2 p-1 rounded-full hover:bg-muted/50 transition-colors"
+          className="p-1 rounded-full hover:bg-slate-700/50 transition-colors"
           aria-label="Edit table"
         >
-          <Edit className="h-3.5 w-3.5 text-foreground opacity-70" />
+          <Edit className="h-4 w-4 text-white" />
         </button>
       </div>
-      <div className={`table-node-content ${cardBgColor} p-1`}>
+      
+      {/* Table Fields */}
+      <div className={`${cardBgColor} text-white`} style={{ backgroundColor: color ? undefined : "#0f172a" }}>
         {fields.map((field, index) => (
-          <div key={index} className="field-row flex items-center p-1.5 text-sm border-b border-border/30 last:border-0">
+          <div key={index} className="field-row flex items-center py-2 px-3 border-b border-slate-700/30 last:border-0 relative">
+            {/* Field icon indicators */}
             <div className="field-key w-6 flex justify-center">
               {field.primary ? (
-                <KeyRound className="h-3.5 w-3.5 text-amber-500" />
+                <KeyRound className="h-4 w-4 text-amber-500" />
               ) : field.foreignKey ? (
-                <Link className="h-3.5 w-3.5 text-primary" />
+                <Link className="h-4 w-4 text-blue-400" />
               ) : null}
             </div>
-            <div className="field-name flex-1 font-medium truncate">{field.name}</div>
-            <div className="field-type text-xs bg-background/80 px-1.5 py-0.5 rounded text-muted-foreground">
+            
+            {/* Field name */}
+            <div className="field-name flex-1 font-medium text-base truncate">{field.name}</div>
+            
+            {/* Field type badge */}
+            <div className="field-type text-xs bg-slate-800 px-2 py-1 rounded text-slate-300 uppercase">
               {field.type}
             </div>
             
-            {/* Add visual indicator for constraints */}
+            {/* Field constraints */}
             {field.notNull && (
-              <div className="ml-1 text-xs bg-secondary px-1 py-0.5 rounded-sm text-secondary-foreground">
+              <div className="ml-1 text-xs bg-slate-700 px-1.5 py-0.5 rounded text-white font-medium">
                 NN
               </div>
             )}
             
-            {/* Handles for connections */}
+            {/* Connection handles for each field */}
             <Handle
               id={field.name}
               type="source"
               position={Position.Right}
-              className="connection-handle right-0 bg-primary/50 w-2 h-2 min-w-2 min-h-2"
-              style={{ top: 10 + index * 34 }}
+              className="connection-handle right-0 bg-blue-500 w-2.5 h-2.5 min-w-2.5 min-h-2.5"
+              style={{ top: 16 + index * 38 }}
             />
             <Handle
               id={field.name}
               type="target"
               position={Position.Left}
-              className="connection-handle left-0 bg-primary/50 w-2 h-2 min-w-2 min-h-2"
-              style={{ top: 10 + index * 34 }}
+              className="connection-handle left-0 bg-blue-500 w-2.5 h-2.5 min-w-2.5 min-h-2.5"
+              style={{ top: 16 + index * 38 }}
             />
           </div>
         ))}
