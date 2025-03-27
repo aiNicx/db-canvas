@@ -10,13 +10,16 @@ import { toast } from "sonner";
 import { Database, ArrowLeft, Plus, Save, Download, Grid, Layers } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { AddTableDialog } from "@/components/AddTableDialog";
+import { EditTableDialog } from "@/components/EditTableDialog";
 
 const Editor = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { projects, openProject, currentProject, updateProject } = useProject();
+  const { projects, openProject, currentProject, updateProject, addTable, exportProjectSQL } = useProject();
   const [showGrid, setShowGrid] = useState(true);
   const [showAddTable, setShowAddTable] = useState(false);
+  const [editingTable, setEditingTable] = useState<TableNode | null>(null);
+  const [showEditTable, setShowEditTable] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -27,8 +30,8 @@ const Editor = () => {
   const handleExportSQL = () => {
     if (!currentProject) return;
     
-    // In a real implementation, this would generate proper SQL
-    const sql = `/* SQL export for ${currentProject.name} */\n\n`;
+    // Generate SQL for PostgreSQL by default
+    const sql = exportProjectSQL(currentProject.id, "postgresql");
     
     // Create a download link
     const blob = new Blob([sql], { type: 'text/plain' });
@@ -46,12 +49,15 @@ const Editor = () => {
 
   const handleAddTable = (tableData: Omit<TableNode, "id" | "position">) => {
     try {
-      // Add table at center of the canvas
-      // In a real implementation, we would calculate a good position
-      const position = { x: 100, y: 100 };
-      const newTable = { ...tableData, position };
+      // Calculate a position for the new table
+      // Place it in the center-ish area of the canvas
+      const position = { 
+        x: Math.random() * 300 + 100, 
+        y: Math.random() * 200 + 100 
+      };
       
-      // This is a placeholder - the actual addTable would be called here
+      // Add the table to the project
+      addTable(tableData, position);
       
       setShowAddTable(false);
       toast.success(`Table "${tableData.name}" added`);
@@ -59,6 +65,11 @@ const Editor = () => {
       console.error("Failed to add table", error);
       toast.error("Failed to add table");
     }
+  };
+
+  const handleEditTable = (table: TableNode) => {
+    setEditingTable(table);
+    setShowEditTable(true);
   };
 
   if (!currentProject) {
@@ -130,7 +141,7 @@ const Editor = () => {
         <div className="flex-1 relative overflow-hidden">
           <DBCanvas project={currentProject} showGrid={showGrid} />
         </div>
-        <Sidebar />
+        <Sidebar onEditTable={handleEditTable} />
       </div>
 
       <AddTableDialog
@@ -138,6 +149,14 @@ const Editor = () => {
         onOpenChange={setShowAddTable}
         onAddTable={handleAddTable}
       />
+
+      {editingTable && (
+        <EditTableDialog
+          open={showEditTable}
+          onOpenChange={setShowEditTable}
+          table={editingTable}
+        />
+      )}
     </div>
   );
 };

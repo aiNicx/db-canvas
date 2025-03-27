@@ -5,10 +5,15 @@ import { TableNode } from '@/types/schema';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Code, TableProperties, Columns, ListTree, ChevronRight, ChevronLeft, Edit, Eye } from 'lucide-react';
+import { Code, TableProperties, Columns, ListTree, ChevronRight, ChevronLeft, Edit, Eye, Trash2 } from 'lucide-react';
+import { toast } from 'sonner';
 
-export function Sidebar() {
-  const { currentProject } = useProject();
+interface SidebarProps {
+  onEditTable?: (table: TableNode) => void;
+}
+
+export function Sidebar({ onEditTable }: SidebarProps) {
+  const { currentProject, deleteTable } = useProject();
   const [collapsed, setCollapsed] = useState(false);
   const [selectedTable, setSelectedTable] = useState<TableNode | null>(null);
 
@@ -23,6 +28,26 @@ export function Sidebar() {
     
     sql += ');';
     return sql;
+  };
+
+  const handleTableClick = (table: TableNode) => {
+    setSelectedTable(table);
+  };
+
+  const handleEditTable = (table: TableNode) => {
+    if (onEditTable) {
+      onEditTable(table);
+    }
+  };
+
+  const handleDeleteTable = (tableId: string, tableName: string) => {
+    if (confirm(`Are you sure you want to delete table "${tableName}"?`)) {
+      deleteTable(tableId);
+      if (selectedTable?.id === tableId) {
+        setSelectedTable(null);
+      }
+      toast.success(`Table "${tableName}" deleted`);
+    }
   };
 
   if (collapsed) {
@@ -71,7 +96,7 @@ export function Sidebar() {
         <TabsList className="w-full rounded-none border-b">
           <TabsTrigger value="tables" className="flex items-center gap-2">
             <TableProperties className="h-4 w-4" />
-            <span>Tables</span>
+            <span>Tables ({currentProject?.tables.length || 0})</span>
           </TabsTrigger>
           <TabsTrigger value="properties" className="flex items-center gap-2">
             <Columns className="h-4 w-4" />
@@ -94,7 +119,7 @@ export function Sidebar() {
                       ? 'bg-primary text-primary-foreground'
                       : 'hover:bg-secondary'
                   }`}
-                  onClick={() => setSelectedTable(table)}
+                  onClick={() => handleTableClick(table)}
                 >
                   <div className="flex items-center gap-2">
                     <TableProperties className="h-4 w-4" />
@@ -103,12 +128,28 @@ export function Sidebar() {
                       ({table.fields.length})
                     </span>
                   </div>
-                  <div className="flex items-center">
-                    <Button variant="ghost" size="icon" className="h-6 w-6">
+                  <div className="flex items-center space-x-1">
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="h-6 w-6"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleEditTable(table);
+                      }}
+                    >
                       <Edit className="h-3 w-3" />
                     </Button>
-                    <Button variant="ghost" size="icon" className="h-6 w-6">
-                      <Eye className="h-3 w-3" />
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="h-6 w-6"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteTable(table.id, table.name);
+                      }}
+                    >
+                      <Trash2 className="h-3 w-3" />
                     </Button>
                   </div>
                 </div>
@@ -162,6 +203,16 @@ export function Sidebar() {
                         </div>
                       </div>
                     ))}
+                  </div>
+                  <div className="pt-2">
+                    <Button 
+                      variant="outline" 
+                      className="w-full"
+                      onClick={() => handleEditTable(selectedTable)}
+                    >
+                      <Edit className="h-4 w-4 mr-2" />
+                      Edit Table
+                    </Button>
                   </div>
                 </div>
               ) : (

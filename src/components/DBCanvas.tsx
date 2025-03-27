@@ -11,9 +11,12 @@ import ReactFlow, {
   useEdgesState,
   addEdge,
   ConnectionLineType,
+  Connection,
 } from "reactflow";
-import { Project } from "@/types/schema";
+import { Project, TableNode, Connection as DBConnection } from "@/types/schema";
 import { TableNodeComponent } from "./TableNodeComponent";
+import { useProject } from "@/contexts/ProjectContext";
+import { toast } from "sonner";
 import "reactflow/dist/style.css";
 
 interface DBCanvasProps {
@@ -26,6 +29,8 @@ const nodeTypes = {
 };
 
 export function DBCanvas({ project, showGrid }: DBCanvasProps) {
+  const { updateProject, addConnection } = useProject();
+
   // Convert tables to nodes for React Flow
   const initialNodes: Node[] = useMemo(
     () =>
@@ -34,6 +39,7 @@ export function DBCanvas({ project, showGrid }: DBCanvasProps) {
         type: "table",
         position: table.position,
         data: { ...table },
+        draggable: true,
       })),
     [project.tables]
   );
@@ -68,7 +74,8 @@ export function DBCanvas({ project, showGrid }: DBCanvasProps) {
 
   // Handle new connections
   const onConnect = useCallback(
-    (params: any) => {
+    (params: Connection) => {
+      // First add the visual edge
       setEdges((eds) =>
         addEdge(
           {
@@ -80,17 +87,45 @@ export function DBCanvas({ project, showGrid }: DBCanvasProps) {
           eds
         )
       );
+
+      // Then add the connection to the project data
+      if (params.source && params.target && params.sourceHandle && params.targetHandle) {
+        try {
+          addConnection({
+            sourceId: params.source,
+            targetId: params.target,
+            sourceField: params.sourceHandle,
+            targetField: params.targetHandle,
+            relationshipType: "oneToMany", // Default relationship type
+          });
+          toast.success("Relation created successfully");
+        } catch (error) {
+          console.error("Failed to create relation:", error);
+          toast.error("Failed to create relation");
+        }
+      }
     },
-    [setEdges]
+    [setEdges, addConnection]
   );
 
-  // This is a placeholder for handling node position changes
+  // This handles node position changes
   const onNodeDragStop = useCallback(
     (event: React.MouseEvent, node: Node) => {
       // Update the table position in the project
-      console.log("Node position updated:", node.id, node.position);
+      if (project && node.id) {
+        const updatedTables = project.tables.map((table) =>
+          table.id === node.id
+            ? { ...table, position: node.position }
+            : table
+        );
+        
+        updateProject({
+          ...project,
+          tables: updatedTables,
+        });
+      }
     },
-    []
+    [project, updateProject]
   );
 
   return (
