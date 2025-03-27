@@ -48,6 +48,15 @@ export const TableNodeComponent = memo(({ data, selected, onEdit }: TableNodePro
       <div className={`${cardBgColor} text-white`} style={{ backgroundColor: color ? undefined : "#0f172a" }}>
         {fields.map((field, index) => (
           <div key={index} className="field-row flex items-center py-2 px-3 border-b border-slate-700/30 last:border-0 relative">
+            {/* Left handle for the field */}
+            <Handle
+              id={`${field.name}-left`}
+              type="target"
+              position={Position.Left}
+              className="connection-handle !left-0 bg-blue-500 w-2.5 h-2.5 min-w-2.5 min-h-2.5"
+              style={{ top: '50%', transform: 'translateY(-50%)' }}
+            />
+            
             {/* Field icon indicators */}
             <div className="field-key w-6 flex justify-center">
               {field.primary ? (
@@ -72,20 +81,13 @@ export const TableNodeComponent = memo(({ data, selected, onEdit }: TableNodePro
               </div>
             )}
             
-            {/* Connection handles for each field */}
+            {/* Right handle for the field */}
             <Handle
               id={field.name}
               type="source"
               position={Position.Right}
-              className="connection-handle right-0 bg-blue-500 w-2.5 h-2.5 min-w-2.5 min-h-2.5"
-              style={{ top: 16 + index * 38 }}
-            />
-            <Handle
-              id={field.name}
-              type="target"
-              position={Position.Left}
-              className="connection-handle left-0 bg-blue-500 w-2.5 h-2.5 min-w-2.5 min-h-2.5"
-              style={{ top: 16 + index * 38 }}
+              className="connection-handle !right-0 bg-blue-500 w-2.5 h-2.5 min-w-2.5 min-h-2.5"
+              style={{ top: '50%', transform: 'translateY(-50%)' }}
             />
           </div>
         ))}

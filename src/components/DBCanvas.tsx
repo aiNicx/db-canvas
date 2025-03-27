@@ -103,7 +103,7 @@ export function DBCanvas({ project, showGrid, onEditTable }: DBCanvasProps) {
         source: connection.sourceId,
         target: connection.targetId,
         sourceHandle: connection.sourceField,
-        targetHandle: connection.targetField,
+        targetHandle: `${connection.targetField}-left`, // Updated to match our new handle IDs
         type: "floating",
         animated: true,
         data: {
@@ -143,11 +143,16 @@ export function DBCanvas({ project, showGrid, onEditTable }: DBCanvasProps) {
       // Then add the connection to the project data
       if (params.source && params.target && params.sourceHandle && params.targetHandle) {
         try {
+          // Extract the actual field name from the target handle (remove '-left' suffix if present)
+          const targetField = params.targetHandle.endsWith('-left') 
+            ? params.targetHandle.replace('-left', '') 
+            : params.targetHandle;
+          
           addConnection({
             sourceId: params.source,
             targetId: params.target,
             sourceField: params.sourceHandle,
-            targetField: params.targetHandle,
+            targetField: targetField,
             relationshipType: "oneToMany", // Default relationship type
           });
           
@@ -156,7 +161,7 @@ export function DBCanvas({ project, showGrid, onEditTable }: DBCanvasProps) {
           const targetTable = project.tables.find(t => t.id === params.target)?.name;
           
           toast.success(
-            `Relation created: ${sourceTable}.${params.sourceHandle} → ${targetTable}.${params.targetHandle}`,
+            `Relation created: ${sourceTable}.${params.sourceHandle} → ${targetTable}.${targetField}`,
             { description: "Foreign key relation established" }
           );
           
@@ -171,7 +176,7 @@ export function DBCanvas({ project, showGrid, onEditTable }: DBCanvasProps) {
                       ...field,
                       foreignKey: {
                         tableId: params.target || "",
-                        fieldName: params.targetHandle || ""
+                        fieldName: targetField
                       }
                     };
                   }
