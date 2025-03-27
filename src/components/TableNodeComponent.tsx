@@ -10,7 +10,14 @@ interface TableNodeProps {
   onEdit?: (tableId: string) => void;
 }
 
-export const TableNodeComponent = memo(({ data, selected, onEdit }: TableNodeProps) => {
+interface ExtendedTableNodeProps extends TableNodeProps {
+  onEdit?: (tableId: string) => void;
+}
+
+export const TableNodeComponent = memo((props: ExtendedTableNodeProps) => {
+  // Extract props - could come from direct props or from data object
+  const { data, selected, onEdit: propOnEdit } = props;
+  const onEdit = propOnEdit || (props.data as TableNode & { onEdit?: (tableId: string) => void })?.onEdit;
   const { name, fields, color } = data;
   
   // Define custom styling based on the table color
@@ -19,8 +26,12 @@ export const TableNodeComponent = memo(({ data, selected, onEdit }: TableNodePro
   
   const handleEditClick = (e: React.MouseEvent) => {
     e.stopPropagation();
+    console.log('Edit button clicked in TableNodeComponent');
     if (onEdit) {
+      console.log('Calling onEdit with table id:', data.id);
       onEdit(data.id);
+    } else {
+      console.warn('onEdit prop is not defined');
     }
   };
 

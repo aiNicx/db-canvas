@@ -86,9 +86,9 @@ export function DBCanvas({ project, showGrid, onEditTable }: DBCanvasProps) {
         id: table.id,
         type: "table",
         position: table.position,
-        data: { 
+        data: {
           ...table,
-          onEdit: onEditTable  // Pass the edit handler to the node component
+          onEdit: onEditTable  // Pass edit handler in data object
         },
         draggable: true,
       })),
