@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -13,7 +14,7 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
 
-    --primary: 222.2 47.4% 11.2%;
+    --primary: 221.2 83.2% 53.3%;
     --primary-foreground: 210 40% 98%;
 
     --secondary: 210 40% 96.1%;
@@ -30,25 +31,21 @@
 
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --ring: 221.2 83.2% 53.3%;
 
     --radius: 0.5rem;
 
-    --sidebar-background: 0 0% 98%;
+    --canvas-background: 220 33% 98%;
+    --canvas-grid: 220 20% 92%;
 
+    --sidebar-background: 0 0% 100%;
     --sidebar-foreground: 240 5.3% 26.1%;
-
-    --sidebar-primary: 240 5.9% 10%;
-
+    --sidebar-primary: 221.2 83.2% 53.3%;
     --sidebar-primary-foreground: 0 0% 98%;
-
     --sidebar-accent: 240 4.8% 95.9%;
-
     --sidebar-accent-foreground: 240 5.9% 10%;
-
     --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-ring: 221.2 83.2% 53.3%;
   }
 
   .dark {
@@ -61,7 +58,7 @@
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 210 40% 98%;
+    --primary: 217.2 91.2% 59.8%;
     --primary-foreground: 222.2 47.4% 11.2%;
 
     --secondary: 217.2 32.6% 17.5%;
@@ -78,15 +75,19 @@
 
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --ring: 224.3 76.3% 48%;
+
+    --canvas-background: 222.2 84% 4.9%;
+    --canvas-grid: 223 30% 12%;
+
+    --sidebar-background: 222.2 84% 4.9%;
+    --sidebar-foreground: 210 40% 98%;
+    --sidebar-primary: 217.2 91.2% 59.8%;
+    --sidebar-primary-foreground: 222.2 47.4% 11.2%;
+    --sidebar-accent: 217.2 32.6% 17.5%;
+    --sidebar-accent-foreground: 210 40% 98%;
+    --sidebar-border: 217.2 32.6% 17.5%;
+    --sidebar-ring: 224.3 76.3% 48%;
   }
 }
 
@@ -97,5 +98,128 @@
 
   body {
     @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
   }
+}
+
+.db-canvas {
+  cursor: grab;
+}
+
+.db-canvas.dragging {
+  cursor: grabbing;
+}
+
+.db-canvas .node {
+  cursor: move;
+}
+
+.db-canvas .connection {
+  stroke: hsl(var(--primary));
+  stroke-width: 2;
+  fill: none;
+  pointer-events: all;
+}
+
+.db-canvas .connection-handle {
+  fill: hsl(var(--background));
+  stroke: hsl(var(--primary));
+  stroke-width: 2;
+  cursor: crosshair;
+}
+
+.db-canvas .connection-label {
+  font-size: 10px;
+  fill: hsl(var(--foreground));
+  text-anchor: middle;
+  user-select: none;
+}
+
+.db-canvas .grid-pattern {
+  stroke: hsl(var(--canvas-grid));
+  stroke-width: 1;
+}
+
+.glassmorphism {
+  @apply bg-background/80 backdrop-blur-lg border border-border shadow-md;
+}
+
+.table-node {
+  @apply bg-card border border-border rounded-md shadow-sm overflow-hidden;
+  min-width: 200px;
+}
+
+.table-node-header {
+  @apply bg-primary text-primary-foreground font-semibold px-3 py-2 cursor-move;
+}
+
+.table-node-content {
+  @apply p-2;
+}
+
+.field-row {
+  @apply flex items-center gap-2 p-1 text-sm border-b border-border last:border-0;
+}
+
+.field-key {
+  @apply w-4 h-4 flex items-center justify-center;
+}
+
+.pk-indicator {
+  @apply text-amber-500 font-bold;
+}
+
+.fk-indicator {
+  @apply text-primary font-bold;
+}
+
+.field-name {
+  @apply font-medium flex-1;
+}
+
+.field-type {
+  @apply text-muted-foreground text-xs whitespace-nowrap;
+}
+
+.react-flow__node {
+  @apply p-0 border-0 shadow-none;
+}
+
+.react-flow__edge {
+  @apply pointer-events-auto;
+}
+
+.react-flow__handle {
+  @apply hidden;
+}
+
+.react-flow__attribution {
+  @apply invisible;
+}
+
+.react-flow__controls-button {
+  @apply border-border bg-card text-foreground hover:bg-secondary;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-muted-foreground/30 rounded-full;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-muted-foreground/50;
+}
+
+/* Smooth transitions for theme changes */
+* {
+  transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out, color 0.2s ease-in-out;
 }
