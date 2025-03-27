@@ -16,7 +16,7 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <ThemeProvider>
       <TooltipProvider>
-        <Toaster />
+        {/* Use only Sonner for toast notifications */}
         <Sonner />
         <ProjectProvider>
           <BrowserRouter>
