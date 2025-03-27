@@ -22,6 +22,7 @@ export interface TableNode {
   name: string;
   fields: Field[];
   position: Position;
+  color?: string; // Optional color property
 }
 
 export interface Connection {

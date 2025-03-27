@@ -5,17 +5,37 @@ import { TableNode } from '@/types/schema';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Code, TableProperties, Columns, ListTree, ChevronRight, ChevronLeft, Edit, Eye, Trash2 } from 'lucide-react';
+import { 
+  Code, 
+  TableProperties, 
+  Columns, 
+  ChevronRight, 
+  ChevronLeft, 
+  Edit, 
+  Trash2, 
+  PaintBucket,
+  Link
+} from 'lucide-react';
 import { toast } from 'sonner';
 
 interface SidebarProps {
-  onEditTable?: (table: TableNode) => void;
+  onEditTable?: (tableId: string) => void;
 }
 
 export function Sidebar({ onEditTable }: SidebarProps) {
-  const { currentProject, deleteTable } = useProject();
+  const { currentProject, deleteTable, updateProject } = useProject();
   const [collapsed, setCollapsed] = useState(false);
   const [selectedTable, setSelectedTable] = useState<TableNode | null>(null);
+
+  const tableColors = [
+    { name: "Default", value: "" },
+    { name: "Blue", value: "blue" },
+    { name: "Red", value: "red" },
+    { name: "Green", value: "green" },
+    { name: "Amber", value: "amber" },
+    { name: "Purple", value: "purple" },
+    { name: "Pink", value: "pink" },
+  ];
 
   // Generate SQL preview for a specific table
   const generateTableSQL = (table: TableNode): string => {
@@ -25,6 +45,21 @@ export function Sidebar({ onEditTable }: SidebarProps) {
       const comma = index < table.fields.length - 1 ? ',' : '';
       sql += `  ${field.name} ${field.type}${field.notNull ? ' NOT NULL' : ''}${field.primary ? ' PRIMARY KEY' : ''}${field.unique && !field.primary ? ' UNIQUE' : ''}${comma}\n`;
     });
+    
+    // Add foreign key references if any fields have them
+    const foreignKeyFields = table.fields.filter(f => f.foreignKey);
+    if (foreignKeyFields.length > 0 && currentProject) {
+      sql += ',\n';
+      foreignKeyFields.forEach((field, index) => {
+        if (field.foreignKey) {
+          const targetTable = currentProject.tables.find(t => t.id === field.foreignKey?.tableId);
+          if (targetTable) {
+            const comma = index < foreignKeyFields.length - 1 ? ',' : '';
+            sql += `  FOREIGN KEY (${field.name}) REFERENCES ${targetTable.name}(${field.foreignKey.fieldName})${comma}\n`;
+          }
+        }
+      });
+    }
     
     sql += ');';
     return sql;
@@ -36,7 +71,7 @@ export function Sidebar({ onEditTable }: SidebarProps) {
 
   const handleEditTable = (table: TableNode) => {
     if (onEditTable) {
-      onEditTable(table);
+      onEditTable(table.id);
     }
   };
 
@@ -48,6 +83,29 @@ export function Sidebar({ onEditTable }: SidebarProps) {
       }
       toast.success(`Table "${tableName}" deleted`);
     }
+  };
+
+  const changeTableColor = (table: TableNode, color: string) => {
+    if (!currentProject) return;
+    
+    const updatedTables = currentProject.tables.map(t => {
+      if (t.id === table.id) {
+        return { ...t, color };
+      }
+      return t;
+    });
+    
+    updateProject({
+      ...currentProject,
+      tables: updatedTables,
+    });
+    
+    // Also update the selected table if it's the one being modified
+    if (selectedTable?.id === table.id) {
+      setSelectedTable({ ...selectedTable, color });
+    }
+    
+    toast.success(`Table color updated`);
   };
 
   if (collapsed) {
@@ -67,9 +125,6 @@ export function Sidebar({ onEditTable }: SidebarProps) {
           </Button>
           <Button variant="ghost" size="icon">
             <Columns className="h-4 w-4" />
-          </Button>
-          <Button variant="ghost" size="icon">
-            <ListTree className="h-4 w-4" />
           </Button>
           <Button variant="ghost" size="icon">
             <Code className="h-4 w-4" />
@@ -171,19 +226,43 @@ export function Sidebar({ onEditTable }: SidebarProps) {
               {selectedTable ? (
                 <div className="space-y-4">
                   <h3 className="font-medium">{selectedTable.name}</h3>
-                  <div className="space-y-1">
+                  
+                  {/* Color selector */}
+                  <div className="space-y-2">
+                    <h4 className="text-sm font-medium">Table Color</h4>
+                    <div className="flex flex-wrap gap-2">
+                      {tableColors.map(color => (
+                        <button
+                          key={color.value}
+                          className={`w-6 h-6 rounded-full ${
+                            color.value ? `bg-${color.value}-500` : 'bg-card border'
+                          } ${selectedTable.color === color.value ? 'ring-2 ring-primary' : ''}`}
+                          title={color.name}
+                          onClick={() => changeTableColor(selectedTable, color.value)}
+                          aria-label={`Set table color to ${color.name}`}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-2">
                     <h4 className="text-sm font-medium">Fields</h4>
                     {selectedTable.fields.map((field, index) => (
                       <div
                         key={index}
-                        className="p-2 text-sm border rounded-md"
+                        className="p-3 text-sm border rounded-md bg-background"
                       >
-                        <div className="flex justify-between">
+                        <div className="flex justify-between items-center">
                           <span className="font-medium flex items-center gap-1">
                             {field.primary && (
-                              <span className="text-amber-500 text-xs">PK</span>
+                              <span className="text-amber-500 text-xs bg-amber-100 dark:bg-amber-950/50 px-1 rounded">PK</span>
                             )}
-                            {field.name}
+                            {field.foreignKey && (
+                              <span className="text-primary text-xs bg-primary/10 px-1 rounded flex items-center">
+                                <Link className="h-3 w-3 mr-0.5" />FK
+                              </span>
+                            )}
+                            <span className="ml-1">{field.name}</span>
                           </span>
                           <span className="text-xs bg-muted px-2 py-0.5 rounded">
                             {field.type}
@@ -200,7 +279,22 @@ export function Sidebar({ onEditTable }: SidebarProps) {
                               UNIQUE
                             </span>
                           )}
+                          {field.defaultValue && (
+                            <span className="text-xs bg-secondary px-1.5 py-0.5 rounded">
+                              DEFAULT: {field.defaultValue}
+                            </span>
+                          )}
                         </div>
+                        
+                        {field.foreignKey && currentProject && (
+                          <div className="mt-2 text-xs p-2 bg-muted/50 rounded">
+                            <span className="text-muted-foreground">References: </span>
+                            <span className="font-medium">
+                              {currentProject.tables.find(t => t.id === field.foreignKey?.tableId)?.name}.
+                              {field.foreignKey.fieldName}
+                            </span>
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>

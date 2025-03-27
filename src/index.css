@@ -1,4 +1,3 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -103,8 +102,9 @@
 .field-row {
   display: flex;
   align-items: center;
-  padding: 6px 12px;
+  padding: 8px 12px;
   position: relative;
+  line-height: 1.2;
 }
 
 .field-key {
@@ -116,13 +116,18 @@
 .field-name {
   flex: 1;
   margin-right: 8px;
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .field-type {
   font-size: 0.7rem;
   opacity: 0.8;
-  padding: 2px 4px;
+  padding: 2px 6px;
   border-radius: 4px;
+  font-weight: 500;
 }
 
 .connection-handle {
@@ -130,6 +135,50 @@
   height: 8px !important;
   min-width: 8px !important;
   min-height: 8px !important;
+  border-radius: 50% !important;
+  transition: all 0.2s ease;
+}
+
+.connection-handle:hover {
+  transform: scale(1.5);
+}
+
+/* Define color variables for table themes */
+:root {
+  /* Add theme colors for tables */
+  --blue: rgb(219, 234, 254);
+  --blue-50: rgb(239, 246, 255);
+  --blue-950: rgb(23, 37, 84);
+  
+  --red: rgb(254, 226, 226);
+  --red-50: rgb(254, 242, 242);
+  --red-950: rgb(69, 10, 10);
+  
+  --green: rgb(220, 252, 231);
+  --green-50: rgb(240, 253, 244);
+  --green-950: rgb(5, 46, 22);
+  
+  --amber: rgb(254, 243, 199);
+  --amber-50: rgb(255, 251, 235);
+  --amber-950: rgb(69, 26, 3);
+  
+  --purple: rgb(243, 232, 255);
+  --purple-50: rgb(250, 245, 255);
+  --purple-950: rgb(59, 7, 100);
+  
+  --pink: rgb(252, 231, 243);
+  --pink-50: rgb(253, 242, 248);
+  --pink-950: rgb(80, 7, 36);
+}
+
+/* Dark mode adjustments */
+.dark .table-node-content {
+  color: rgb(229, 231, 235);
+}
+
+.dark .field-type {
+  background-color: rgba(17, 24, 39, 0.5);
+  color: rgb(209, 213, 219);
 }
 
 /* Fixes for ReactFlow in dark mode */

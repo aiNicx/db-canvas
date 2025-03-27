@@ -22,13 +22,14 @@ import "reactflow/dist/style.css";
 interface DBCanvasProps {
   project: Project;
   showGrid: boolean;
+  onEditTable?: (tableId: string) => void;
 }
 
 const nodeTypes = {
   table: TableNodeComponent,
 };
 
-export function DBCanvas({ project, showGrid }: DBCanvasProps) {
+export function DBCanvas({ project, showGrid, onEditTable }: DBCanvasProps) {
   const { updateProject, addConnection } = useProject();
 
   // Convert tables to nodes for React Flow
@@ -38,10 +39,13 @@ export function DBCanvas({ project, showGrid }: DBCanvasProps) {
         id: table.id,
         type: "table",
         position: table.position,
-        data: { ...table },
+        data: { 
+          ...table,
+          onEdit: onEditTable  // Pass the edit handler to the node component
+        },
         draggable: true,
       })),
-    [project.tables]
+    [project.tables, onEditTable]
   );
 
   // Convert connections to edges for React Flow
@@ -98,14 +102,49 @@ export function DBCanvas({ project, showGrid }: DBCanvasProps) {
             targetField: params.targetHandle,
             relationshipType: "oneToMany", // Default relationship type
           });
-          toast.success("Relation created successfully");
+          
+          // Get source and target table names for better toast message
+          const sourceTable = project.tables.find(t => t.id === params.source)?.name;
+          const targetTable = project.tables.find(t => t.id === params.target)?.name;
+          
+          toast.success(
+            `Relation created: ${sourceTable}.${params.sourceHandle} → ${targetTable}.${params.targetHandle}`,
+            { description: "Foreign key relation established" }
+          );
+          
+          // Also update the field information to mark it as a foreign key
+          const updatedTables = project.tables.map(table => {
+            if (table.id === params.source) {
+              return {
+                ...table,
+                fields: table.fields.map(field => {
+                  if (field.name === params.sourceHandle) {
+                    return {
+                      ...field,
+                      foreignKey: {
+                        tableId: params.target || "",
+                        fieldName: params.targetHandle || ""
+                      }
+                    };
+                  }
+                  return field;
+                })
+              };
+            }
+            return table;
+          });
+          
+          updateProject({
+            ...project,
+            tables: updatedTables
+          });
         } catch (error) {
           console.error("Failed to create relation:", error);
           toast.error("Failed to create relation");
         }
       }
     },
-    [setEdges, addConnection]
+    [setEdges, addConnection, project, updateProject]
   );
 
   // This handles node position changes

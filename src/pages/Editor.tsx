@@ -67,9 +67,12 @@ const Editor = () => {
     }
   };
 
-  const handleEditTable = (table: TableNode) => {
-    setEditingTable(table);
-    setShowEditTable(true);
+  const handleEditTable = (tableId: string) => {
+    const table = currentProject?.tables.find(t => t.id === tableId);
+    if (table) {
+      setEditingTable(table);
+      setShowEditTable(true);
+    }
   };
 
   if (!currentProject) {
@@ -139,7 +142,11 @@ const Editor = () => {
 
       <div className="flex-1 flex overflow-hidden">
         <div className="flex-1 relative overflow-hidden">
-          <DBCanvas project={currentProject} showGrid={showGrid} />
+          <DBCanvas 
+            project={currentProject} 
+            showGrid={showGrid} 
+            onEditTable={handleEditTable}
+          />
         </div>
         <Sidebar onEditTable={handleEditTable} />
       </div>
