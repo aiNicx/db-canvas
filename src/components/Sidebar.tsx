@@ -1,8 +1,8 @@
 
-import { useState, useEffect, useRef, ChangeEvent } from 'react';
-import { useProject } from '@/hooks/useProject';
-import { TableNode, Field } from '@/types/schema';
-import { Connection } from "@/types/schema";
+import { useState, useEffect, useRef, ChangeEvent } from 'react'; // Added ChangeEvent
+import { useProject } from '@/hooks/useProject'; // Updated import path
+import { TableNode, Field } from '@/types/schema'; // Added Field
+import { Connection } from "@/types/schema"; // Import Connection type
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -16,15 +16,16 @@ import {
   Trash2,
   PaintBucket,
   Link,
-  Copy,
-  Upload
+  Copy, // Added Copy icon here
+  Upload // Added Upload icon
 } from 'lucide-react';
 import { toast } from 'sonner';
-import { v4 as uuidv4 } from 'uuid';
 
+import { v4 as uuidv4 } from 'uuid'; // Import uuid
 interface SidebarProps {
   onEditTable?: (tableId: string) => void;
 }
+
 
 // Interface for the imported JSON column definition
 interface ImportedColumnDef {
@@ -32,18 +33,19 @@ interface ImportedColumnDef {
   column_name: string;
   data_type: string;
   column_default?: string | null;
-  is_nullable?: string;
-  referenced_table_name?: string | null;
-  referenced_column_name?: string | null;
+  is_nullable?: string; // "YES" or "NO"
+  referenced_table_name?: string | null; // Added for FK
+  referenced_column_name?: string | null; // Added for FK
 }
 
+
 export function Sidebar({ onEditTable }: SidebarProps) {
+  // Destructure correctly: get tablesApi and updateFullProject
   const { currentProject, tablesApi, updateFullProject } = useProject();
   const [collapsed, setCollapsed] = useState(false);
   const [selectedTable, setSelectedTable] = useState<TableNode | null>(null);
-  const [activeTab, setActiveTab] = useState('tables');
   const tablesListRef = useRef<HTMLDivElement>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null); // Ref for file input
   const tableColors = [
     { name: "Default", value: "" },
     { name: "Blue", value: "blue" },
@@ -68,6 +70,7 @@ export function Sidebar({ onEditTable }: SidebarProps) {
       }
     }
   }, [selectedTable]);
+
 
   // Generate SQL preview for a specific table
   const generateTableSQL = (table: TableNode): string => {
@@ -101,13 +104,10 @@ export function Sidebar({ onEditTable }: SidebarProps) {
     setSelectedTable(table);
   };
 
+  // Re-applying the definition to potentially refresh linter state
   const handleDuplicateTable = (tableId: string, tableName: string) => {
-    const newTable = tablesApi.duplicateTable(tableId);
-    if (newTable) {
-      toast.success(`Table "${tableName}" duplicated`);
-      // Select the newly duplicated table
-      setSelectedTable(newTable);
-    }
+    tablesApi.duplicateTable(tableId);
+    toast.success(`Table "${tableName}" duplicated`);
   };
 
   const handleEditTable = (table: TableNode) => {
@@ -118,7 +118,7 @@ export function Sidebar({ onEditTable }: SidebarProps) {
 
   const handleDeleteTable = (tableId: string, tableName: string) => {
     if (confirm(`Are you sure you want to delete table "${tableName}"?`)) {
-      tablesApi.deleteTable(tableId);
+      tablesApi.deleteTable(tableId); // Use tablesApi
       if (selectedTable?.id === tableId) {
         setSelectedTable(null);
       }
@@ -136,15 +136,17 @@ export function Sidebar({ onEditTable }: SidebarProps) {
       return t;
     });
 
+    // Pass an updater function to updateFullProject
     updateFullProject((prevProject) => {
-      if (!prevProject) return currentProject;
+      if (!prevProject) return currentProject; // Should not happen, but safety first
       return {
         ...prevProject,
         tables: updatedTables,
-        updatedAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(), // Also update the timestamp
       };
     });
 
+    // Also update the selected table if it's the one being modified
     if (selectedTable?.id === table.id) {
       setSelectedTable({ ...selectedTable, color });
     }
@@ -152,7 +154,8 @@ export function Sidebar({ onEditTable }: SidebarProps) {
     toast.success(`Table color updated`);
   };
 
-  // Import JSON Logic
+
+  // --- Import JSON Logic ---
   const handleImportClick = () => {
     fileInputRef.current?.click();
   };
@@ -167,16 +170,23 @@ export function Sidebar({ onEditTable }: SidebarProps) {
         const content = e.target?.result as string;
         const jsonData = JSON.parse(content);
 
+        // Basic validation (check if it's an array)
         if (!Array.isArray(jsonData)) {
           throw new Error("Invalid JSON format: Expected an array of column definitions.");
         }
 
+        // TODO: More robust validation of the JSON structure against expected schema
+
+        // Process the JSON data
         processImportedJson(jsonData);
+
         toast.success("Project imported successfully from JSON!");
+
       } catch (error) {
         console.error("Error importing JSON:", error);
         toast.error(`Error importing JSON: ${error instanceof Error ? error.message : 'Unknown error'}`);
       } finally {
+        // Reset file input value to allow importing the same file again
         if (fileInputRef.current) {
           fileInputRef.current.value = '';
         }
@@ -184,21 +194,23 @@ export function Sidebar({ onEditTable }: SidebarProps) {
     };
     reader.onerror = () => {
       toast.error("Error reading file.");
-      if (fileInputRef.current) {
+       // Reset file input value
+       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
     };
     reader.readAsText(file);
   };
 
-  // Process the parsed JSON data and update the project state
+  // Function to process the parsed JSON data and update the project state
   const processImportedJson = (jsonData: ImportedColumnDef[]) => {
-    if (!updateFullProject) return;
+    if (!updateFullProject) return; // Ensure update function exists
 
     const tablesMap = new Map<string, TableNode>();
+    // Keep track of fields created, mapping original colDef to the created Field object
     const fieldCreationMap = new Map<ImportedColumnDef, Field>();
 
-    // First Pass: Create Tables and Fields
+    // --- First Pass: Create Tables and Fields ---
     jsonData.forEach((colDef) => {
       const tableName = colDef.table_name;
       if (!tableName) return;
@@ -223,7 +235,7 @@ export function Sidebar({ onEditTable }: SidebarProps) {
         unique: false,
         notNull: colDef.is_nullable === 'NO',
         defaultValue: colDef.column_default,
-        foreignKey: null,
+        foreignKey: null, // Initialize FK as null
       };
 
       if (field.name.toLowerCase() === 'id') {
@@ -231,45 +243,58 @@ export function Sidebar({ onEditTable }: SidebarProps) {
       }
 
       table.fields.push(field);
-      fieldCreationMap.set(colDef, field);
+      fieldCreationMap.set(colDef, field); // Map original def to created field
     });
 
     const newTables = Array.from(tablesMap.values());
-    const newConnections: Connection[] = [];
+    const newConnections: Connection[] = []; // Array to hold connections
 
-    // Second Pass: Create Connections and Update FKs
+    // --- Second Pass: Create Connections and Update FKs ---
     jsonData.forEach((colDef) => {
       if (colDef.referenced_table_name && colDef.referenced_column_name) {
         const sourceTable = tablesMap.get(colDef.table_name);
         const targetTable = tablesMap.get(colDef.referenced_table_name);
+
+        // Find the source field object using the map
         const sourceField = fieldCreationMap.get(colDef);
 
         if (sourceTable && targetTable && sourceField) {
+          // Find the target field object within the target table
           const targetField = targetTable.fields.find(
             (f) => f.name === colDef.referenced_column_name
           );
 
           if (targetField) {
+            // 1. Update the source field's foreignKey property
             sourceField.foreignKey = {
               tableId: targetTable.id,
-              fieldName: targetField.name,
+              fieldName: targetField.name, // Store target field name for display/info
             };
 
+            // 2. Create the Connection object
             const newConnection: Connection = {
               id: uuidv4(),
               sourceId: sourceTable.id,
               targetId: targetTable.id,
-              sourceField: sourceField.name,
-              targetField: targetField.name,
+              sourceField: sourceField.name, // Use field NAME
+              targetField: targetField.name, // Use field NAME
+              // Defaulting to oneToMany. Determining oneToOne might require checking unique constraints on the sourceField.
               relationshipType: "oneToMany",
             };
             newConnections.push(newConnection);
+          } else {
+             console.warn(`Could not find target field '${colDef.referenced_column_name}' in table '${colDef.referenced_table_name}' for FK from ${colDef.table_name}.${colDef.column_name}`);
           }
+        } else {
+           if (!sourceTable) console.warn(`Could not find source table '${colDef.table_name}' for FK.`);
+           if (!targetTable) console.warn(`Could not find target table '${colDef.referenced_table_name}' for FK.`);
+           if (!sourceField) console.warn(`Could not find source field mapping for ${colDef.table_name}.${colDef.column_name}.`);
         }
       }
     });
 
-    // Update Project State
+
+    // --- Update Project State ---
     updateFullProject((prevProject) => {
       const baseProject = prevProject || {
         id: uuidv4(),
@@ -283,11 +308,13 @@ export function Sidebar({ onEditTable }: SidebarProps) {
       return {
         ...baseProject,
         tables: newTables,
-        connections: newConnections,
+        connections: newConnections, // Add connections here
         updatedAt: new Date().toISOString(),
       };
     });
   };
+  // --- End Import JSON Logic ---
+
 
   if (collapsed) {
     return (
@@ -301,34 +328,13 @@ export function Sidebar({ onEditTable }: SidebarProps) {
           <ChevronRight className="h-4 w-4" />
         </Button>
         <div className="flex flex-col items-center gap-2">
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            onClick={() => {
-              setCollapsed(false);
-              setActiveTab('tables');
-            }}
-          >
+          <Button variant="ghost" size="icon">
             <TableProperties className="h-4 w-4" />
           </Button>
-          <Button 
-            variant="ghost" 
-            size="icon"
-            onClick={() => {
-              setCollapsed(false);
-              setActiveTab('properties');
-            }}
-          >
+          <Button variant="ghost" size="icon">
             <Columns className="h-4 w-4" />
           </Button>
-          <Button 
-            variant="ghost" 
-            size="icon"
-            onClick={() => {
-              setCollapsed(false);
-              setActiveTab('sql');
-            }}
-          >
+          <Button variant="ghost" size="icon">
             <Code className="h-4 w-4" />
           </Button>
         </div>
@@ -336,10 +342,11 @@ export function Sidebar({ onEditTable }: SidebarProps) {
     );
   }
 
-  return (
-    <div className="w-80 border-l bg-card flex flex-col overflow-hidden">
-      <div className="flex items-center justify-between p-4 border-b">
-        <h3 className="font-medium">Project Details</h3>
+ return (
+   // Added overflow-hidden to allow inner ScrollArea to work correctly
+   <div className="w-80 border-l bg-card flex flex-col overflow-hidden">
+     <div className="flex items-center justify-between p-4 border-b">
+       <h3 className="font-medium">Project Details</h3>
         <Button
           variant="ghost"
           size="icon"
@@ -349,11 +356,7 @@ export function Sidebar({ onEditTable }: SidebarProps) {
         </Button>
       </div>
 
-      <Tabs 
-        value={activeTab} 
-        onValueChange={setActiveTab} 
-        className="flex-1 flex flex-col"
-      >
+      <Tabs defaultValue="tables" className="flex-1 flex flex-col">
         <TabsList className="w-full rounded-none border-b">
           <TabsTrigger value="tables" className="flex items-center gap-2">
             <TableProperties className="h-4 w-4" />
@@ -368,99 +371,103 @@ export function Sidebar({ onEditTable }: SidebarProps) {
             <span>SQL</span>
           </TabsTrigger>
         </TabsList>
+<TabsContent value="tables" className="flex-1 min-h-0 flex flex-col">
+    {/* Add Import Button and Hidden Input */}
+    <div className="p-4 border-b">
+      <Button onClick={handleImportClick} variant="outline" className="w-full">
+        <Upload className="h-4 w-4 mr-2" />
+        Import from JSON
+      </Button>
+      <input
+        type="file"
+        ref={fileInputRef}
+        onChange={handleFileChange}
+        accept=".json"
+        style={{ display: 'none' }}
+      />
+    </div>
+    {/* End Import Button */}
 
-        <TabsContent value="tables" className="flex-1 p-0 flex flex-col overflow-hidden">
-          <div className="p-4 border-b">
-            <Button onClick={handleImportClick} variant="outline" className="w-full">
-              <Upload className="h-4 w-4 mr-2" />
-              Import from JSON
-            </Button>
-            <input
-              type="file"
-              ref={fileInputRef}
-              onChange={handleFileChange}
-              accept=".json"
-              style={{ display: 'none' }}
-            />
-          </div>
-
-          <div className="flex-1 overflow-hidden">
-            <ScrollArea className="h-full">
-              <div ref={tablesListRef} className="p-4 space-y-2">
-                {currentProject?.tables.map((table) => (
-                  <div
-                    key={table.id}
-                    data-table-id={table.id}
-                    className={`p-2 rounded-md cursor-pointer flex items-center justify-between ${
-                      selectedTable?.id === table.id
-                        ? 'bg-primary text-primary-foreground'
-                        : 'hover:bg-secondary'
-                    }`}
-                    onClick={() => handleTableClick(table)}
-                  >
-                    <div className="flex items-center gap-2">
-                      <TableProperties className="h-4 w-4" />
-                      <span>{table.name}</span>
-                      <span className="text-xs opacity-70">
-                        ({table.fields.length})
-                      </span>
-                    </div>
-                    <div className="flex items-center space-x-1">
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        className="h-6 w-6"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleEditTable(table);
-                        }}
-                      >
-                        <Edit className="h-3 w-3" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-6 w-6"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDuplicateTable(table.id, table.name);
-                        }}
-                      >
-                        <Copy className="h-3 w-3" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-6 w-6"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDeleteTable(table.id, table.name);
-                        }}
-                      >
-                        <Trash2 className="h-3 w-3" />
-                      </Button>
-                    </div>
+    {/* Scrollable table list with explicit height constraints */}
+    <div className="flex-1 min-h-0 overflow-hidden">
+      <ScrollArea className="h-full w-full">
+        <div ref={tablesListRef} className="p-4 space-y-2">
+          {currentProject?.tables.map((table) => (
+                         <div
+                           key={table.id}
+                           data-table-id={table.id} // Add data attribute
+                  className={`p-2 rounded-md cursor-pointer flex items-center justify-between ${
+                    selectedTable?.id === table.id
+                      ? 'bg-primary text-primary-foreground'
+                      : 'hover:bg-secondary'
+                  }`}
+                  onClick={() => handleTableClick(table)}
+                >
+                  <div className="flex items-center gap-2">
+                    <TableProperties className="h-4 w-4" />
+                    <span>{table.name}</span>
+                    <span className="text-xs opacity-70">
+                      ({table.fields.length})
+                    </span>
                   </div>
-                ))}
-                {currentProject?.tables.length === 0 && (
-                  <div className="text-center py-8 text-muted-foreground">
-                    <TableProperties className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                    <p>No tables in this project</p>
-                    <p className="text-sm">Click "Add Table" to get started</p>
+                  <div className="flex items-center space-x-1">
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="h-6 w-6"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleEditTable(table);
+                      }}
+                    >
+                      <Edit className="h-3 w-3" />
+                    </Button>
+                    {/* Add Duplicate Button */}
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-6 w-6"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDuplicateTable(table.id, table.name);
+                      }}
+                    >
+                      <Copy className="h-3 w-3" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-6 w-6"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteTable(table.id, table.name);
+                      }}
+                    >
+                      <Trash2 className="h-3 w-3" />
+                    </Button>
                   </div>
-                )}
-              </div>
-            </ScrollArea>
-          </div>
-        </TabsContent>
+                </div>
+              ))}
+              {currentProject?.tables.length === 0 && (
+                <div className="text-center py-8 text-muted-foreground">
+                  <TableProperties className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                  <p>No tables in this project</p>
+                  <p className="text-sm">Click "Add Table" to get started</p>
+                </div>
+              )}
+            </div>
+          </ScrollArea>
+        </div> {/* Added missing closing div for overflow container */}
+      </TabsContent>
 
-        <TabsContent value="properties" className="flex-1 p-0 flex flex-col overflow-hidden">
-          <ScrollArea className="h-full">
+        <TabsContent value="properties" className="flex-1 p-0 flex flex-col">
+          <ScrollArea className="flex-1">
             <div className="p-4">
               {selectedTable ? (
                 <div className="space-y-4">
                   <h3 className="font-medium">{selectedTable.name}</h3>
                   
+                  {/* Color selector */}
                   <div className="space-y-2">
                     <h4 className="text-sm font-medium">Table Color</h4>
                     <div className="flex flex-wrap gap-2">
@@ -482,7 +489,7 @@ export function Sidebar({ onEditTable }: SidebarProps) {
                     <h4 className="text-sm font-medium">Fields</h4>
                     {selectedTable.fields.map((field, index) => (
                       <div
-                        key={field.id || index}
+                        key={index}
                         className="p-3 text-sm border rounded-md bg-background"
                       >
                         <div className="flex justify-between items-center">
@@ -553,8 +560,9 @@ export function Sidebar({ onEditTable }: SidebarProps) {
           </ScrollArea>
         </TabsContent>
 
-        <TabsContent value="sql" className="flex-1 p-0 flex flex-col overflow-hidden">
-          <ScrollArea className="h-full">
+        {/* Removed flex flex-col to allow content to start from top */}
+        <TabsContent value="sql" className="flex-1 p-0">
+          <ScrollArea className="flex-1">
             <div className="p-4">
               {selectedTable ? (
                 <div className="space-y-4">
