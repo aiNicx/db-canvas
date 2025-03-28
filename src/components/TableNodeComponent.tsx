@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Handle, Position } from 'reactflow';
 import { TableNode } from '@/types/schema';
@@ -19,13 +20,13 @@ export function TableNodeComponent({ data, selected, id }: NodeComponentProps) {
 
   // Extract current project ID from URL for navigation
   const path = window.location.pathname;
-  const projectIdMatch = path.match(/\/editor\/([^\/]+)/);
+  const projectIdMatch = path.match(/\/project\/([^\/]+)/);
   const projectId = projectIdMatch ? projectIdMatch[1] : null;
 
   const handleEditClick = (event: React.MouseEvent) => {
     event.stopPropagation();
     if (projectId) {
-      navigate(`/editor/${projectId}/tables/${id}`);
+      navigate(`/project/${projectId}/tables/${id}`);
     }
   };
 
@@ -81,20 +82,20 @@ export function TableNodeComponent({ data, selected, id }: NodeComponentProps) {
               {field.name}
             </div>
             <div className="field-type">{field.type}</div>
-            {/* Add a handle for each field */}
+            {/* Handles for each field */}
             <Handle
               type="source"
               position={Position.Right}
               id={`${field.id}-out`}
               className="field-handle"
-              style={{ top: `${28 + index * 24}px`, right: '-8px' }}
+              style={{ top: '50%', right: '-8px' }}
             />
             <Handle
               type="target"
               position={Position.Left}
               id={`${field.id}-in`}
               className="field-handle"
-              style={{ top: `${28 + index * 24}px`, left: '-8px' }}
+              style={{ top: '50%', left: '-8px' }}
             />
           </div>
         ))}
@@ -102,4 +103,3 @@ export function TableNodeComponent({ data, selected, id }: NodeComponentProps) {
     </div>
   );
 }
-

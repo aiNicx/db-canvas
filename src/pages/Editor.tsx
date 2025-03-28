@@ -1,8 +1,7 @@
-
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { useProject } from "@/hooks/useProject"; // Updated import path
-import { TableNode, Position } from "@/types/schema"; // Added Position import
+import { useProject } from "@/hooks/useProject"; 
+import { TableNode, Position } from "@/types/schema";
 import { DBCanvas } from "@/components/DBCanvas";
 import { Sidebar } from "@/components/Sidebar";
 import { Button } from "@/components/ui/button";
@@ -13,8 +12,7 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 const Editor = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  // Destructure correctly: get tablesApi, remove non-existent/unused props
-  const { openProject, currentProject, tablesApi, exportProjectSQL } = useProject(); // Added exportProjectSQL
+  const { openProject, currentProject, tablesApi, exportProjectSQL } = useProject();
   const [showGrid, setShowGrid] = useState(true);
   const [showAddTable, setShowAddTable] = useState(false);
   const [editingTable, setEditingTable] = useState<TableNode | null>(null);
@@ -25,12 +23,10 @@ const Editor = () => {
     }
   }, [id, openProject]);
 
-
   useEffect(() => {
     if (showAddTable && currentProject) {
-      navigate(`/editor/${currentProject.id}/tables/new`);
-      // Consider if you want to reset showAddTable after navigating
-      // setShowAddTable(false); 
+      navigate(`/project/${currentProject.id}/tables/new`);
+      setShowAddTable(false); 
     }
   }, [showAddTable, currentProject, navigate]);
 
@@ -54,16 +50,14 @@ const Editor = () => {
     toast.success("SQL exported successfully");
   };
 
-
   const handleEditTable = (tableId: string) => {
     const table = currentProject?.tables.find(t => t.id === tableId);
     if (table && currentProject) {
-      navigate(`/editor/${currentProject.id}/tables/${table.id}`);
+      navigate(`/project/${currentProject.id}/tables/${table.id}`);
     }
   };
 
   if (!currentProject) {
-    // Project not found or not loaded yet
     return (
       <div className="h-screen flex items-center justify-center">
         <div className="text-center">
@@ -137,8 +131,6 @@ const Editor = () => {
         </div>
         <Sidebar onEditTable={handleEditTable} />
       </div>
-
-
     </div>
   );
 };
