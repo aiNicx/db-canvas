@@ -103,19 +103,51 @@ export const useConnections = (
       return false;
     }
 
-    const updatedConnections = connections.filter(c => c.id !== id);
+    // Find the connection being deleted to get source info
+    const connectionToDelete = project.connections.find(c => c.id === id);
+
+    if (!connectionToDelete) {
+      toast.error("Connection not found for deletion");
+      return false;
+    }
 
     // Update project state using the updater function
     updateProject(prevProject => {
       if (!prevProject) return project!; // Should not happen
-      setConnections(updatedConnections); // Keep local state sync
+
+      // 1. Filter out the deleted connection
+      const updatedConnections = prevProject.connections.filter(c => c.id !== id);
+
+      // 2. Remove the foreign key from the source table's field
+      const updatedTables = prevProject.tables.map(table => {
+        if (table.id === connectionToDelete.sourceId) {
+          return {
+            ...table,
+            fields: table.fields.map(field => {
+              if (field.name === connectionToDelete.sourceField && field.foreignKey) {
+                // Return a new field object without the foreignKey property
+                const { foreignKey, ...rest } = field;
+                return rest;
+              }
+              return field;
+            })
+          };
+        }
+        return table;
+      });
+
+      // REMOVED: setConnections(updatedConnections); - Local state sync is not needed here,
+      // the component should react to the updated project prop.
+
       return {
         ...prevProject,
         connections: updatedConnections,
+        tables: updatedTables, // Include updated tables
         updatedAt: new Date().toISOString()
       };
     });
 
+    toast.success("Connection deleted");
     return true;
   };
 

@@ -9,8 +9,6 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Database, ArrowLeft, Plus, Save, Download, Grid, Layers } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { AddTableDialog } from "@/components/AddTableDialog";
-import { EditTableDialog } from "@/components/EditTableDialog";
 
 const Editor = () => {
   const { id } = useParams<{ id: string }>();
@@ -20,7 +18,6 @@ const Editor = () => {
   const [showGrid, setShowGrid] = useState(true);
   const [showAddTable, setShowAddTable] = useState(false);
   const [editingTable, setEditingTable] = useState<TableNode | null>(null);
-  const [showEditTable, setShowEditTable] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -48,31 +45,11 @@ const Editor = () => {
     toast.success("SQL exported successfully");
   };
 
-  const handleAddTable = (tableData: Omit<TableNode, "id" | "position">) => {
-    try {
-      // Calculate a position for the new table
-      // Place it in the center-ish area of the canvas
-      const position = { 
-        x: Math.random() * 300 + 100, 
-        y: Math.random() * 200 + 100 
-      };
-      
-      // Use tablesApi to add the table
-      tablesApi.addTable(tableData, position);
-      
-      setShowAddTable(false);
-      toast.success(`Table "${tableData.name}" added`);
-    } catch (error) {
-      console.error("Failed to add table", error);
-      toast.error("Failed to add table");
-    }
-  };
 
   const handleEditTable = (tableId: string) => {
     const table = currentProject?.tables.find(t => t.id === tableId);
-    if (table) {
-      setEditingTable(table);
-      setShowEditTable(true);
+    if (table && currentProject) {
+      navigate(`/editor/${currentProject.id}/tables/${table.id}`);
     }
   };
 
@@ -152,19 +129,10 @@ const Editor = () => {
         <Sidebar onEditTable={handleEditTable} />
       </div>
 
-      <AddTableDialog
-        open={showAddTable}
-        onOpenChange={setShowAddTable}
-        onAddTable={handleAddTable}
-      />
-
-      {editingTable && (
-        <EditTableDialog
-          open={showEditTable}
-          onOpenChange={setShowEditTable}
-          table={editingTable}
-        />
+      {showAddTable && currentProject && (
+        navigate(`/editor/${currentProject.id}/tables/new`)
       )}
+
     </div>
   );
 };

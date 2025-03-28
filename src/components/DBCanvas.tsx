@@ -1,5 +1,6 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { v4 as uuidv4 } from "uuid";
 import ReactFlow, {
   Background,
   Controls,
@@ -14,11 +15,17 @@ import ReactFlow, {
   Connection,
   EdgeTypes,
   getBezierPath,
+  EdgeChange,
+  applyEdgeChanges,
+  NodeChange,        // Added
+  applyNodeChanges,  // Added
 } from "reactflow";
 import { Project, TableNode, Connection as DBConnection } from "@/types/schema";
 import { TableNodeComponent } from "./TableNodeComponent";
 import { useProject } from "@/hooks/useProject"; // Updated import path
 import { toast } from "sonner";
+import { FloatingEdge } from "./FloatingEdge"; // Import the extracted component
+import { useClipboardHandling } from '@/hooks/useClipboardHandling';
 import "reactflow/dist/style.css";
 
 interface DBCanvasProps {
@@ -27,63 +34,7 @@ interface DBCanvasProps {
   onEditTable?: (tableId: string) => void;
 }
 
-// Custom edge to replace the missing "floating" edge type
-const FloatingEdge = ({
-  id,
-  source,
-  target,
-  sourceX,
-  sourceY,
-  targetX,
-  targetY,
-  sourcePosition,
-  targetPosition,
-  style = {},
-  data,
-  markerEnd,
-}) => {
-  const [edgePath] = getBezierPath({
-    sourceX,
-    sourceY,
-    sourcePosition,
-    targetX,
-    targetY,
-    targetPosition,
-  });
-
-  return (
-    <>
-      <path
-        id={id}
-        style={{
-          ...style,
-          strokeWidth: 2,
-          stroke: 'hsl(var(--primary))',
-          strokeDasharray: data?.relationshipType === "oneToMany" ? "5 5" : undefined,
-        }}
-        className="react-flow__edge-path"
-        d={edgePath}
-        markerEnd={markerEnd}
-      />
-      <text
-        dy={-5}
-        style={{
-          fontSize: 10,
-          fill: 'hsl(var(--primary))',
-          fontWeight: 'bold',
-        }}
-      >
-        <textPath
-          href={`#${id}`}
-          startOffset="50%"
-          textAnchor="middle"
-        >
-          {data?.relationshipType === "oneToMany" ? "1:N" : "1:1"}
-        </textPath>
-      </text>
-    </>
-  );
-};
+// FloatingEdge component definition removed
 
 const nodeTypes = {
   table: TableNodeComponent,
@@ -96,75 +47,46 @@ const edgeTypes: EdgeTypes = {
 
 export function DBCanvas({ project, showGrid, onEditTable }: DBCanvasProps): JSX.Element {
   const { connectionsApi, tablesApi, currentProject } = useProject();
-  const [nodes, setNodes, onNodesChange] = useNodesState([]);
-  const [edges, setEdges, onEdgesChange] = useEdgesState([]);
 
-  // Convert tables to nodes for React Flow
-  const initialNodes: Node[] = useMemo(
+  // Convert tables/connections for initial state and updates
+  const reactFlowNodes: Node[] = useMemo(
     () =>
       project.tables.map((table) => ({
-        id: table.id,
-        type: "table",
-        position: table.position,
-        data: {
-          ...table,
-          onEdit: onEditTable  // Pass edit handler in data object
-        },
-        draggable: true,
+        id: table.id, type: "table", position: table.position,
+        data: { ...table, onEdit: onEditTable }, draggable: true,
       })),
     [project.tables, onEditTable]
   );
-
-  // Convert connections to edges for React Flow
-  const initialEdges: Edge[] = useMemo(
+  const reactFlowEdges: Edge[] = useMemo(
     () =>
       project.connections.map((connection) => ({
-        id: connection.id,
-        source: connection.sourceId,
-        target: connection.targetId,
-        sourceHandle: connection.sourceField,
-        targetHandle: `${connection.targetField}-left`,
-        type: "floating",
-        animated: true,
-        zIndex: 10,
-        style: {
-          strokeWidth: 2,
-          stroke: 'hsl(var(--primary))',
-        },
-        data: {
-          relationshipType: connection.relationshipType,
-        },
-        markerEnd: 'arrow' as const,
+        id: connection.id, source: connection.sourceId, target: connection.targetId,
+        sourceHandle: connection.sourceField, targetHandle: `${connection.targetField}-left`,
+        type: "floating", animated: true, zIndex: 10,
+        style: { strokeWidth: 2, stroke: 'hsl(var(--primary))' },
+        data: { relationshipType: connection.relationshipType }, markerEnd: 'arrow' as const,
       })),
-    [project.connections, project.tables]
+    [project.connections]
   );
 
-  // Update nodes and edges when project changes
+  // Initialize state hooks with initial data
+  const [nodes, setNodes, onNodesChangeInternal] = useNodesState(reactFlowNodes);
+  const [edges, setEdges, onEdgesChangeInternal] = useEdgesState(reactFlowEdges);
+
+  // Effect to update nodes/edges when reactFlowNodes/reactFlowEdges change (e.g., project loaded/updated)
+  // This replaces the previous problematic useEffect
   useEffect(() => {
-    setNodes(initialNodes);
-    setEdges(initialEdges);
+    setNodes(reactFlowNodes);
+  }, [reactFlowNodes, setNodes]);
 
-    // Validate and clean up connections after initial load
-    const invalidConnections = project.connections.filter(conn => {
-      const sourceTable = project.tables.find(t => t.id === conn.sourceId);
-      const targetTable = project.tables.find(t => t.id === conn.targetId);
-      return !sourceTable || !targetTable ||
-             !sourceTable.fields.some(f => f.name === conn.sourceField) ||
-             !targetTable.fields.some(f => f.name === conn.targetField);
-    });
+  useEffect(() => {
+    setEdges(reactFlowEdges);
+  }, [reactFlowEdges, setEdges]);
 
-    if (invalidConnections.length > 0) {
-      toast.warning(`Found and removed ${invalidConnections.length} invalid connections`);
-      
-      // Remove invalid connections using the API
-      invalidConnections.forEach(conn => {
-        connectionsApi.deleteConnection(conn.id);
-      });
-      
-      // Note: The project state will be updated automatically by the deleteConnection calls
-      // via the updateProject callback passed to the hook. No need to call updateProject here.
-    }
-  }, [project, initialNodes, initialEdges, setNodes, setEdges, connectionsApi, tablesApi]); // Updated dependencies
+
+  // Initialize clipboard handling hook (pass nodes state)
+  useClipboardHandling({ nodes, projectTables: project.tables, tablesApi });
+
 
   // Handle new connections
   const onConnect = useCallback(
@@ -262,16 +184,48 @@ export function DBCanvas({ project, showGrid, onEditTable }: DBCanvasProps): JSX
       }
     },
     // Use currentProject in dependency array
-    [currentProject, tablesApi, setNodes]
+    [currentProject, tablesApi] // Removed setNodes
   );
+
+
+  // Custom handler for node changes (handles selection, position, etc.)
+  const handleNodesChange = useCallback(
+    (changes: NodeChange[]) => setNodes(applyNodeChanges(changes, nodes)),
+    [nodes, setNodes] // Depends on current nodes and the setter
+  );
+
+  // Custom handler for edge changes (handles selection, and intercepts removal)
+  const handleEdgesChange = useCallback(
+    (changes: EdgeChange[]) => {
+      const nextChanges = changes.reduce<EdgeChange[]>((acc, change) => {
+        if (change.type === 'remove') {
+          // Call the API to delete the connection from the project state
+          connectionsApi.deleteConnection(change.id);
+          // Don't apply the removal change directly via setEdges,
+          // let the project state update trigger the re-render.
+          return acc;
+        }
+        // Accumulate other changes (selection, etc.)
+        acc.push(change);
+        return acc;
+      }, []);
+
+      // Apply accumulated non-remove changes using the setter from useEdgesState
+      if (nextChanges.length > 0) {
+        setEdges(applyEdgeChanges(nextChanges, edges));
+      }
+    },
+    [connectionsApi, edges, setEdges] // Depends on API, current edges, and the setter
+  );
+
 
   return (
     <div className="h-full w-full bg-canvas-background">
       <ReactFlow
         nodes={nodes}
         edges={edges}
-        onNodesChange={onNodesChange}
-        onEdgesChange={onEdgesChange}
+        onNodesChange={handleNodesChange}
+        onEdgesChange={handleEdgesChange} // Use custom handler
         onConnect={onConnect}
         onNodeDragStop={onNodeDragStop}
         nodeTypes={nodeTypes}

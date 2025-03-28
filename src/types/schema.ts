@@ -8,17 +8,39 @@ export interface Position {
 }
 
 export interface Field {
+  id: string; // Add unique ID
   name: string;
   type: string;
   notNull: boolean;
   primary: boolean;
   unique: boolean;
-  defaultValue?: string;
+  // Allow different types for default value
+  defaultValue?: string | number | boolean | null;
   foreignKey?: {
     tableId: string;
     fieldName: string;
   };
 }
+
+// Interface to represent a database data type, potentially with parameters
+export interface DataType {
+  name: string; // e.g., 'VARCHAR', 'INT', 'DECIMAL'
+  params?: number[]; // e.g., [255] for VARCHAR(255), [10, 2] for DECIMAL(10,2)
+  // We might add more properties later, like requiresParams: boolean
+}
+
+// Example list of common data types (can be expanded)
+export const COMMON_DATA_TYPES: DataType[] = [
+  { name: 'INT' },
+  { name: 'VARCHAR', params: [255] },
+  { name: 'TEXT' },
+  { name: 'DATE' },
+  { name: 'DATETIME' },
+  { name: 'BOOLEAN' },
+  { name: 'DECIMAL', params: [10, 2] },
+  { name: 'FLOAT' },
+  { name: 'DOUBLE' },
+];
 
 export interface TableNode {
   id: string;

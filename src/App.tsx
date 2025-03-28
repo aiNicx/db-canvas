@@ -8,6 +8,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ProjectProvider } from "./contexts/NewProjectContext";
 import Dashboard from "./pages/Dashboard";
 import Editor from "./pages/Editor";
+import { TableEditorPage } from "./pages/TableEditorPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -23,6 +24,8 @@ const App = () => (
             <Routes>
               <Route path="/" element={<Dashboard />} />
               <Route path="/project/:id" element={<Editor />} />
+              <Route path="/editor/:projectId/tables/new" element={<TableEditorPage />} />
+              <Route path="/editor/:projectId/tables/:tableId" element={<TableEditorPage />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
