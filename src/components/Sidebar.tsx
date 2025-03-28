@@ -1,8 +1,7 @@
-
-import { useState, useEffect, useRef, ChangeEvent } from 'react'; // Added ChangeEvent
-import { useProject } from '@/hooks/useProject'; // Updated import path
-import { TableNode, Field } from '@/types/schema'; // Added Field
-import { Connection } from "@/types/schema"; // Import Connection type
+import { useState, useEffect, useRef, ChangeEvent } from 'react';
+import { useProject } from '@/hooks/useProject';
+import { TableNode, Field } from '@/types/schema';
+import { Connection } from "@/types/schema";
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -16,16 +15,15 @@ import {
   Trash2,
   PaintBucket,
   Link,
-  Copy, // Added Copy icon here
-  Upload // Added Upload icon
+  Copy,
+  Upload
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { v4 as uuidv4 } from 'uuid';
 
-import { v4 as uuidv4 } from 'uuid'; // Import uuid
 interface SidebarProps {
   onEditTable?: (tableId: string) => void;
 }
-
 
 // Interface for the imported JSON column definition
 interface ImportedColumnDef {
@@ -37,7 +35,6 @@ interface ImportedColumnDef {
   referenced_table_name?: string | null; // Added for FK
   referenced_column_name?: string | null; // Added for FK
 }
-
 
 export function Sidebar({ onEditTable }: SidebarProps) {
   // Destructure correctly: get tablesApi and updateFullProject
@@ -70,7 +67,6 @@ export function Sidebar({ onEditTable }: SidebarProps) {
       }
     }
   }, [selectedTable]);
-
 
   // Generate SQL preview for a specific table
   const generateTableSQL = (table: TableNode): string => {
@@ -153,7 +149,6 @@ export function Sidebar({ onEditTable }: SidebarProps) {
     
     toast.success(`Table color updated`);
   };
-
 
   // --- Import JSON Logic ---
   const handleImportClick = () => {
@@ -315,7 +310,6 @@ export function Sidebar({ onEditTable }: SidebarProps) {
   };
   // --- End Import JSON Logic ---
 
-
   if (collapsed) {
     return (
       <div className="w-12 border-l bg-card flex flex-col items-center py-4">
@@ -342,11 +336,10 @@ export function Sidebar({ onEditTable }: SidebarProps) {
     );
   }
 
- return (
-   // Added overflow-hidden to allow inner ScrollArea to work correctly
-   <div className="w-80 border-l bg-card flex flex-col overflow-hidden">
-     <div className="flex items-center justify-between p-4 border-b">
-       <h3 className="font-medium">Project Details</h3>
+  return (
+    <div className="w-80 border-l bg-card flex flex-col h-full overflow-hidden">
+      <div className="flex items-center justify-between p-4 border-b">
+        <h3 className="font-medium">Project Details</h3>
         <Button
           variant="ghost"
           size="icon"
@@ -371,97 +364,94 @@ export function Sidebar({ onEditTable }: SidebarProps) {
             <span>SQL</span>
           </TabsTrigger>
         </TabsList>
-<TabsContent value="tables" className="flex-1 min-h-0 flex flex-col">
-    {/* Add Import Button and Hidden Input */}
-    <div className="p-4 border-b">
-      <Button onClick={handleImportClick} variant="outline" className="w-full">
-        <Upload className="h-4 w-4 mr-2" />
-        Import from JSON
-      </Button>
-      <input
-        type="file"
-        ref={fileInputRef}
-        onChange={handleFileChange}
-        accept=".json"
-        style={{ display: 'none' }}
-      />
-    </div>
-    {/* End Import Button */}
 
-    {/* Scrollable table list with explicit height constraints */}
-    <div className="flex-1 min-h-0 overflow-hidden">
-      <ScrollArea className="h-full w-full">
-        <div ref={tablesListRef} className="p-4 space-y-2">
-          {currentProject?.tables.map((table) => (
-                         <div
-                           key={table.id}
-                           data-table-id={table.id} // Add data attribute
-                  className={`p-2 rounded-md cursor-pointer flex items-center justify-between ${
-                    selectedTable?.id === table.id
-                      ? 'bg-primary text-primary-foreground'
-                      : 'hover:bg-secondary'
-                  }`}
-                  onClick={() => handleTableClick(table)}
-                >
-                  <div className="flex items-center gap-2">
-                    <TableProperties className="h-4 w-4" />
-                    <span>{table.name}</span>
-                    <span className="text-xs opacity-70">
-                      ({table.fields.length})
-                    </span>
+        {/* Fixed Tab Content - Each tab content now has a fixed height and proper overflow handling */}
+        <TabsContent value="tables" className="flex-1 flex flex-col p-0">
+          <div className="p-4 border-b">
+            <Button onClick={handleImportClick} variant="outline" className="w-full">
+              <Upload className="h-4 w-4 mr-2" />
+              Import from JSON
+            </Button>
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleFileChange}
+              accept=".json"
+              style={{ display: 'none' }}
+            />
+          </div>
+          <div className="flex-1 overflow-hidden">
+            <ScrollArea className="h-full">
+              <div ref={tablesListRef} className="p-4 space-y-2">
+                {currentProject?.tables.map((table) => (
+                  <div
+                    key={table.id}
+                    data-table-id={table.id}
+                    className={`p-2 rounded-md cursor-pointer flex items-center justify-between ${
+                      selectedTable?.id === table.id
+                        ? 'bg-primary text-primary-foreground'
+                        : 'hover:bg-secondary'
+                    }`}
+                    onClick={() => handleTableClick(table)}
+                  >
+                    <div className="flex items-center gap-2">
+                      <TableProperties className="h-4 w-4" />
+                      <span>{table.name}</span>
+                      <span className="text-xs opacity-70">
+                        ({table.fields.length})
+                      </span>
+                    </div>
+                    <div className="flex items-center space-x-1">
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="h-6 w-6"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleEditTable(table);
+                        }}
+                      >
+                        <Edit className="h-3 w-3" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-6 w-6"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDuplicateTable(table.id, table.name);
+                        }}
+                      >
+                        <Copy className="h-3 w-3" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-6 w-6"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteTable(table.id, table.name);
+                        }}
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </Button>
+                    </div>
                   </div>
-                  <div className="flex items-center space-x-1">
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      className="h-6 w-6"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleEditTable(table);
-                      }}
-                    >
-                      <Edit className="h-3 w-3" />
-                    </Button>
-                    {/* Add Duplicate Button */}
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-6 w-6"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDuplicateTable(table.id, table.name);
-                      }}
-                    >
-                      <Copy className="h-3 w-3" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-6 w-6"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDeleteTable(table.id, table.name);
-                      }}
-                    >
-                      <Trash2 className="h-3 w-3" />
-                    </Button>
+                ))}
+                {currentProject?.tables.length === 0 && (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <TableProperties className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                    <p>No tables in this project</p>
+                    <p className="text-sm">Click "Add Table" to get started</p>
                   </div>
-                </div>
-              ))}
-              {currentProject?.tables.length === 0 && (
-                <div className="text-center py-8 text-muted-foreground">
-                  <TableProperties className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                  <p>No tables in this project</p>
-                  <p className="text-sm">Click "Add Table" to get started</p>
-                </div>
-              )}
-            </div>
-          </ScrollArea>
-        </div> {/* Added missing closing div for overflow container */}
-      </TabsContent>
+                )}
+              </div>
+            </ScrollArea>
+          </div>
+        </TabsContent>
 
-        <TabsContent value="properties" className="flex-1 p-0 flex flex-col">
-          <ScrollArea className="flex-1">
+        <TabsContent value="properties" className="flex-1 p-0">
+          <ScrollArea className="h-full">
             <div className="p-4">
               {selectedTable ? (
                 <div className="space-y-4">
@@ -560,9 +550,8 @@ export function Sidebar({ onEditTable }: SidebarProps) {
           </ScrollArea>
         </TabsContent>
 
-        {/* Removed flex flex-col to allow content to start from top */}
         <TabsContent value="sql" className="flex-1 p-0">
-          <ScrollArea className="flex-1">
+          <ScrollArea className="h-full">
             <div className="p-4">
               {selectedTable ? (
                 <div className="space-y-4">

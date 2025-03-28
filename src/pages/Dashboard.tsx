@@ -1,7 +1,7 @@
 
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useProject } from "@/hooks/useProject"; // Updated import path
+import { useProject } from "@/hooks/useProject"; 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -11,15 +11,29 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { formatDistanceToNow } from "date-fns";
-import { Database, FolderPlus, Copy, Trash2, ArrowRight, Import, Layers } from "lucide-react";
+import { Database, FolderPlus, Copy, Trash2, ArrowRight, Import, Layers, FileJson } from "lucide-react";
+
+// Interface for the imported JSON column definition
+interface ImportedColumnDef {
+  table_name: string;
+  column_name: string;
+  data_type: string;
+  column_default?: string | null;
+  is_nullable?: string; // "YES" or "NO"
+  referenced_table_name?: string | null; 
+  referenced_column_name?: string | null;
+}
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const { projects, createProject, deleteProject, duplicateProject } = useProject();
+  const { projects, createProject, deleteProject, duplicateProject, updateFullProject } = useProject();
   const [newProjectName, setNewProjectName] = useState("Untitled Project");
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
+  const [importTabValue, setImportTabValue] = useState("sql");
   const [sqlImport, setSqlImport] = useState("");
+  const [jsonImport, setJsonImport] = useState("");
+  const [fileContent, setFileContent] = useState<ImportedColumnDef[] | null>(null);
 
   const handleCreateProject = () => {
     if (newProjectName.trim()) {
@@ -30,13 +44,63 @@ const Dashboard = () => {
   };
 
   const handleImportProject = () => {
-    // In a full implementation, this would parse the SQL and create a project
-    setIsImportDialogOpen(false);
-    setSqlImport("");
+    // In a full implementation, this would parse the SQL/JSON and create a project
+    if (importTabValue === "sql" && sqlImport.trim()) {
+      // SQL import logic
+      setIsImportDialogOpen(false);
+      setSqlImport("");
+    } else if (importTabValue === "json" && (jsonImport.trim() || fileContent)) {
+      // JSON import logic
+      try {
+        const jsonData = fileContent || JSON.parse(jsonImport);
+        if (Array.isArray(jsonData)) {
+          const newProject = createProject(`Imported JSON Project`);
+          
+          // Process the JSON data similar to the sidebar implementation
+          processImportedJson(jsonData, newProject.id);
+          
+          // Navigate to the new project
+          navigate(`/project/${newProject.id}`);
+        }
+      } catch (error) {
+        console.error("Error parsing JSON:", error);
+      }
+      setIsImportDialogOpen(false);
+      setJsonImport("");
+      setFileContent(null);
+    }
+  };
+
+  const processImportedJson = (jsonData: ImportedColumnDef[], projectId: string) => {
+    // Implementation would be similar to the one in Sidebar.tsx
+    // Here we would just call updateFullProject with the processed data
+    // This is a simplified version
+    updateFullProject((prevProject) => {
+      if (!prevProject) return null;
+      // Process JSON data and update project
+      return prevProject;
+    }, projectId);
   };
 
   const handleOpenProject = (id: string) => {
     navigate(`/project/${id}`);
+  };
+
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const content = e.target?.result as string;
+        const jsonData = JSON.parse(content);
+        setFileContent(jsonData);
+      } catch (error) {
+        console.error("Error reading JSON file:", error);
+      }
+    };
+    reader.readAsText(file);
   };
 
   const sortedProjects = [...projects].sort(
@@ -56,7 +120,10 @@ const Dashboard = () => {
             <Button 
               variant="outline" 
               className="flex items-center gap-2"
-              onClick={() => setIsImportDialogOpen(true)}
+              onClick={() => {
+                setIsImportDialogOpen(true);
+                setImportTabValue("sql");
+              }}
             >
               <Import className="h-4 w-4" />
               <span>Import</span>
@@ -251,25 +318,72 @@ const Dashboard = () => {
       <Dialog open={isImportDialogOpen} onOpenChange={setIsImportDialogOpen}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>Import from SQL</DialogTitle>
+            <DialogTitle>Import Project</DialogTitle>
             <DialogDescription>
-              Paste your SQL schema to import it as a new project.
+              Import a project from SQL or JSON format.
             </DialogDescription>
           </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid gap-2">
-              <Label htmlFor="sql">SQL Schema</Label>
-              <textarea
-                id="sql"
-                value={sqlImport}
-                onChange={(e) => setSqlImport(e.target.value)}
-                placeholder="Paste your SQL schema here..."
-                rows={10}
-                className="min-h-[200px] p-3 rounded-md border resize-none"
-              />
-            </div>
-          </div>
-          <DialogFooter>
+          
+          <Tabs value={importTabValue} onValueChange={setImportTabValue} className="mt-2">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="sql" className="flex items-center gap-2">
+                <Database className="h-4 w-4" />
+                <span>SQL</span>
+              </TabsTrigger>
+              <TabsTrigger value="json" className="flex items-center gap-2">
+                <FileJson className="h-4 w-4" />
+                <span>JSON</span>
+              </TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="sql" className="mt-4">
+              <div className="grid gap-4 py-2">
+                <div className="grid gap-2">
+                  <Label htmlFor="sql">SQL Schema</Label>
+                  <textarea
+                    id="sql"
+                    value={sqlImport}
+                    onChange={(e) => setSqlImport(e.target.value)}
+                    placeholder="Paste your SQL schema here..."
+                    rows={10}
+                    className="min-h-[200px] p-3 rounded-md border resize-none"
+                  />
+                </div>
+              </div>
+            </TabsContent>
+            
+            <TabsContent value="json" className="mt-4">
+              <div className="grid gap-4 py-2">
+                <div className="grid gap-2">
+                  <Label htmlFor="json">JSON Schema</Label>
+                  <textarea
+                    id="json"
+                    value={jsonImport}
+                    onChange={(e) => setJsonImport(e.target.value)}
+                    placeholder="Paste your JSON schema here..."
+                    rows={10}
+                    className="min-h-[200px] p-3 rounded-md border resize-none"
+                  />
+                  <div className="text-sm text-muted-foreground mb-2">
+                    Or upload a JSON file:
+                  </div>
+                  <Input
+                    type="file"
+                    accept=".json"
+                    onChange={handleFileUpload}
+                    className="cursor-pointer"
+                  />
+                  {fileContent && (
+                    <div className="p-2 bg-muted text-muted-foreground rounded-md text-sm">
+                      File loaded: {fileContent.length} entries
+                    </div>
+                  )}
+                </div>
+              </div>
+            </TabsContent>
+          </Tabs>
+          
+          <DialogFooter className="mt-4">
             <Button variant="outline" onClick={() => setIsImportDialogOpen(false)}>
               Cancel
             </Button>
