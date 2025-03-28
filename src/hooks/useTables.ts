@@ -95,10 +95,58 @@ export const useTables = (
     return true;
   };
 
+  const duplicateTable = (id: string): TableNode | null => {
+    if (!project) {
+      toast.error("No project open");
+      return null;
+    }
+
+    const originalTable = tables.find(t => t.id === id);
+    if (!originalTable) {
+      toast.error("Table not found");
+      return null;
+    }
+
+    // Create a deep copy and generate new field IDs
+    const duplicatedFields = originalTable.fields.map(field => ({
+      ...field,
+      id: uuidv4(), // Generate new unique ID for each field
+      // Reset foreign key if needed, or handle duplication logic carefully
+      // For now, let's keep FK but it might point to the original table's fields
+      // A more robust solution might involve updating FKs based on duplicated table context
+    }));
+
+    const newTable: TableNode = {
+      ...originalTable, // Copy all properties
+      id: uuidv4(), // New unique ID for the table
+      name: `${originalTable.name} (Copy)`, // Append copy indicator
+      position: { // Offset position slightly
+        x: originalTable.position.x + 20,
+        y: originalTable.position.y + 20,
+      },
+      fields: duplicatedFields, // Use fields with new IDs
+    };
+
+    // Update project state using the updater function
+    updateProject(prevProject => {
+      if (!prevProject) return project!; // Should not happen
+      const updatedTables = [...prevProject.tables, newTable];
+      setTables(updatedTables); // Keep local state sync
+      return {
+        ...prevProject,
+        tables: updatedTables,
+        updatedAt: new Date().toISOString()
+      };
+    });
+
+    return newTable;
+  };
+
   return {
     tables,
     addTable,
     updateTable,
-    deleteTable
+    deleteTable,
+    duplicateTable // Add duplicateTable here
   };
 };

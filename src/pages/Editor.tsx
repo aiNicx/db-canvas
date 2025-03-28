@@ -25,6 +25,15 @@ const Editor = () => {
     }
   }, [id, openProject]);
 
+
+  useEffect(() => {
+    if (showAddTable && currentProject) {
+      navigate(`/editor/${currentProject.id}/tables/new`);
+      // Consider if you want to reset showAddTable after navigating
+      // setShowAddTable(false); 
+    }
+  }, [showAddTable, currentProject, navigate]);
+
   const handleExportSQL = () => {
     if (!currentProject) return;
     
@@ -129,9 +138,6 @@ const Editor = () => {
         <Sidebar onEditTable={handleEditTable} />
       </div>
 
-      {showAddTable && currentProject && (
-        navigate(`/editor/${currentProject.id}/tables/new`)
-      )}
 
     </div>
   );

@@ -1,0 +1,1676 @@
+[
+    {
+      "table_name": "admins",
+      "column_name": "id",
+      "data_type": "uuid",
+      "column_default": "gen_random_uuid()",
+      "is_nullable": "NO",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "admins",
+      "column_name": "user_id",
+      "data_type": "uuid",
+      "column_default": null,
+      "is_nullable": "NO",
+      "referenced_table_name": "users",
+      "referenced_column_name": "id"
+    },
+    {
+      "table_name": "clusters",
+      "column_name": "id",
+      "data_type": "uuid",
+      "column_default": "gen_random_uuid()",
+      "is_nullable": "NO",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "clusters",
+      "column_name": "created_at",
+      "data_type": "timestamp with time zone",
+      "column_default": "(now() AT TIME ZONE 'utc'::text)",
+      "is_nullable": "NO",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "clusters",
+      "column_name": "name",
+      "data_type": "text",
+      "column_default": null,
+      "is_nullable": "NO",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "clusters",
+      "column_name": "team_cluster_leader_id",
+      "data_type": "bigint",
+      "column_default": null,
+      "is_nullable": "YES",
+      "referenced_table_name": "teams",
+      "referenced_column_name": "id"
+    },
+    {
+      "table_name": "clusters",
+      "column_name": "department_id",
+      "data_type": "uuid",
+      "column_default": null,
+      "is_nullable": "NO",
+      "referenced_table_name": "departments",
+      "referenced_column_name": "id"
+    },
+    {
+      "table_name": "clusters",
+      "column_name": "reporting_days",
+      "data_type": "integer",
+      "column_default": null,
+      "is_nullable": "NO",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "clusters",
+      "column_name": "logo_url",
+      "data_type": "text",
+      "column_default": null,
+      "is_nullable": "YES",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "clusters",
+      "column_name": "level_id",
+      "data_type": "uuid",
+      "column_default": null,
+      "is_nullable": "NO",
+      "referenced_table_name": "levels",
+      "referenced_column_name": "id"
+    },
+    {
+      "table_name": "comments",
+      "column_name": "id",
+      "data_type": "uuid",
+      "column_default": "gen_random_uuid()",
+      "is_nullable": "NO",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "comments",
+      "column_name": "created_at",
+      "data_type": "timestamp with time zone",
+      "column_default": "(now() AT TIME ZONE 'utc'::text)",
+      "is_nullable": "NO",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "comments",
+      "column_name": "text",
+      "data_type": "text",
+      "column_default": null,
+      "is_nullable": "NO",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "comments",
+      "column_name": "updated_at",
+      "data_type": "timestamp with time zone",
+      "column_default": null,
+      "is_nullable": "YES",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "comments",
+      "column_name": "sender_id",
+      "data_type": "uuid",
+      "column_default": null,
+      "is_nullable": "NO",
+      "referenced_table_name": "users",
+      "referenced_column_name": "id"
+    },
+    {
+      "table_name": "comments",
+      "column_name": "receiver_id",
+      "data_type": "uuid",
+      "column_default": null,
+      "is_nullable": "NO",
+      "referenced_table_name": "users",
+      "referenced_column_name": "id"
+    },
+    {
+      "table_name": "comments",
+      "column_name": "indicator_id",
+      "data_type": "uuid",
+      "column_default": null,
+      "is_nullable": "YES",
+      "referenced_table_name": "indicators",
+      "referenced_column_name": "id"
+    },
+    {
+      "table_name": "comments",
+      "column_name": "initiative_id",
+      "data_type": "uuid",
+      "column_default": null,
+      "is_nullable": "YES",
+      "referenced_table_name": "initiatives",
+      "referenced_column_name": "id"
+    },
+    {
+      "table_name": "comments",
+      "column_name": "team_id",
+      "data_type": "bigint",
+      "column_default": null,
+      "is_nullable": "YES",
+      "referenced_table_name": "teams",
+      "referenced_column_name": "id"
+    },
+    {
+      "table_name": "comments",
+      "column_name": "read_at",
+      "data_type": "timestamp with time zone",
+      "column_default": null,
+      "is_nullable": "YES",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "companies",
+      "column_name": "id",
+      "data_type": "bigint",
+      "column_default": "nextval('companies_id_seq'::regclass)",
+      "is_nullable": "NO",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "companies",
+      "column_name": "created_at",
+      "data_type": "timestamp with time zone",
+      "column_default": "(now() AT TIME ZONE 'utc'::text)",
+      "is_nullable": "NO",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "companies",
+      "column_name": "name",
+      "data_type": "text",
+      "column_default": null,
+      "is_nullable": "NO",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "companies",
+      "column_name": "north_star_key_result_id",
+      "data_type": "uuid",
+      "column_default": null,
+      "is_nullable": "YES",
+      "referenced_table_name": "key_results",
+      "referenced_column_name": "id"
+    },
+    {
+      "table_name": "companies",
+      "column_name": "mission",
+      "data_type": "text",
+      "column_default": null,
+      "is_nullable": "NO",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "companies",
+      "column_name": "vision",
+      "data_type": "text",
+      "column_default": null,
+      "is_nullable": "NO",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "companies",
+      "column_name": "min_report_rate_ok",
+      "data_type": "double precision",
+      "column_default": null,
+      "is_nullable": "YES",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "companies",
+      "column_name": "min_review_rate_ok",
+      "data_type": "double precision",
+      "column_default": null,
+      "is_nullable": "YES",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "departments",
+      "column_name": "id",
+      "data_type": "uuid",
+      "column_default": "gen_random_uuid()",
+      "is_nullable": "NO",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "departments",
+      "column_name": "created_at",
+      "data_type": "timestamp with time zone",
+      "column_default": "(now() AT TIME ZONE 'utc'::text)",
+      "is_nullable": "NO",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "departments",
+      "column_name": "department_leader_id",
+      "data_type": "uuid",
+      "column_default": null,
+      "is_nullable": "NO",
+      "referenced_table_name": "users",
+      "referenced_column_name": "id"
+    },
+    {
+      "table_name": "departments",
+      "column_name": "company_id",
+      "data_type": "bigint",
+      "column_default": null,
+      "is_nullable": "NO",
+      "referenced_table_name": "companies",
+      "referenced_column_name": "id"
+    },
+    {
+      "table_name": "departments",
+      "column_name": "name",
+      "data_type": "text",
+      "column_default": null,
+      "is_nullable": "NO",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "forecasts",
+      "column_name": "id",
+      "data_type": "uuid",
+      "column_default": "gen_random_uuid()",
+      "is_nullable": "NO",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "forecasts",
+      "column_name": "created_at",
+      "data_type": "timestamp with time zone",
+      "column_default": "(now() AT TIME ZONE 'utc'::text)",
+      "is_nullable": "NO",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "forecasts",
+      "column_name": "value",
+      "data_type": "double precision",
+      "column_default": null,
+      "is_nullable": "NO",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "forecasts",
+      "column_name": "date",
+      "data_type": "date",
+      "column_default": null,
+      "is_nullable": "NO",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "forecasts",
+      "column_name": "indicator_id",
+      "data_type": "uuid",
+      "column_default": null,
+      "is_nullable": "NO",
+      "referenced_table_name": "indicators",
+      "referenced_column_name": "id"
+    },
+    {
+      "table_name": "forecasts",
+      "column_name": "updated_at",
+      "data_type": "timestamp with time zone",
+      "column_default": null,
+      "is_nullable": "YES",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "forecasts",
+      "column_name": "updated_by",
+      "data_type": "uuid",
+      "column_default": null,
+      "is_nullable": "YES",
+      "referenced_table_name": "users",
+      "referenced_column_name": "id"
+    },
+    {
+      "table_name": "forecasts",
+      "column_name": "deleted_at",
+      "data_type": "timestamp with time zone",
+      "column_default": null,
+      "is_nullable": "YES",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "indicators",
+      "column_name": "id",
+      "data_type": "uuid",
+      "column_default": "gen_random_uuid()",
+      "is_nullable": "NO",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "indicators",
+      "column_name": "company_id",
+      "data_type": "bigint",
+      "column_default": null,
+      "is_nullable": "NO",
+      "referenced_table_name": "companies",
+      "referenced_column_name": "id"
+    },
+    {
+      "table_name": "indicators",
+      "column_name": "description",
+      "data_type": "text",
+      "column_default": null,
+      "is_nullable": "NO",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "indicators",
+      "column_name": "symbol",
+      "data_type": "text",
+      "column_default": null,
+      "is_nullable": "NO",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "indicators",
+      "column_name": "periodicity",
+      "data_type": "bigint",
+      "column_default": null,
+      "is_nullable": "NO",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "indicators",
+      "column_name": "assignee_id",
+      "data_type": "uuid",
+      "column_default": null,
+      "is_nullable": "NO",
+      "referenced_table_name": "users",
+      "referenced_column_name": "id"
+    },
+    {
+      "table_name": "indicators",
+      "column_name": "created_at",
+      "data_type": "timestamp with time zone",
+      "column_default": "(now() AT TIME ZONE 'utc'::text)",
+      "is_nullable": "NO",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "indicators",
+      "column_name": "automation_url",
+      "data_type": "text",
+      "column_default": null,
+      "is_nullable": "YES",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "indicators",
+      "column_name": "automation_description",
+      "data_type": "text",
+      "column_default": null,
+      "is_nullable": "YES",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "indicators",
+      "column_name": "deleted_at",
+      "data_type": "timestamp with time zone",
+      "column_default": null,
+      "is_nullable": "YES",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "indicators",
+      "column_name": "notes",
+      "data_type": "text",
+      "column_default": null,
+      "is_nullable": "YES",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "indicators",
+      "column_name": "is_reverse",
+      "data_type": "boolean",
+      "column_default": null,
+      "is_nullable": "YES",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "initiatives",
+      "column_name": "id",
+      "data_type": "uuid",
+      "column_default": "gen_random_uuid()",
+      "is_nullable": "NO",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "initiatives",
+      "column_name": "created_at",
+      "data_type": "timestamp with time zone",
+      "column_default": "(now() AT TIME ZONE 'utc'::text)",
+      "is_nullable": "NO",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "initiatives",
+      "column_name": "description",
+      "data_type": "text",
+      "column_default": null,
+      "is_nullable": "NO",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "initiatives",
+      "column_name": "risk_id",
+      "data_type": "uuid",
+      "column_default": null,
+      "is_nullable": "NO",
+      "referenced_table_name": "risks",
+      "referenced_column_name": "id"
+    },
+    {
+      "table_name": "initiatives",
+      "column_name": "assignee_id",
+      "data_type": "uuid",
+      "column_default": null,
+      "is_nullable": "NO",
+      "referenced_table_name": "users",
+      "referenced_column_name": "id"
+    },
+    {
+      "table_name": "initiatives",
+      "column_name": "updated_at",
+      "data_type": "timestamp with time zone",
+      "column_default": null,
+      "is_nullable": "YES",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "initiatives",
+      "column_name": "created_by",
+      "data_type": "uuid",
+      "column_default": null,
+      "is_nullable": "NO",
+      "referenced_table_name": "users",
+      "referenced_column_name": "id"
+    },
+    {
+      "table_name": "initiatives",
+      "column_name": "check_in_days",
+      "data_type": "integer",
+      "column_default": null,
+      "is_nullable": "NO",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "initiatives",
+      "column_name": "status",
+      "data_type": "integer",
+      "column_default": null,
+      "is_nullable": "NO",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "initiatives",
+      "column_name": "is_new",
+      "data_type": "boolean",
+      "column_default": null,
+      "is_nullable": "NO",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "initiatives",
+      "column_name": "last_check_in_date",
+      "data_type": "date",
+      "column_default": null,
+      "is_nullable": "YES",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "initiatives",
+      "column_name": "relative_impact",
+      "data_type": "double precision",
+      "column_default": null,
+      "is_nullable": "NO",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "initiatives",
+      "column_name": "overall_impact",
+      "data_type": "double precision",
+      "column_default": null,
+      "is_nullable": "NO",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "initiatives",
+      "column_name": "finished_at",
+      "data_type": "timestamp with time zone",
+      "column_default": null,
+      "is_nullable": "YES",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "initiatives",
+      "column_name": "external_url",
+      "data_type": "text",
+      "column_default": null,
+      "is_nullable": "YES",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "initiatives",
+      "column_name": "team_id",
+      "data_type": "bigint",
+      "column_default": null,
+      "is_nullable": "NO",
+      "referenced_table_name": "teams",
+      "referenced_column_name": "id"
+    },
+    {
+      "table_name": "initiatives",
+      "column_name": "deleted_at",
+      "data_type": "timestamp with time zone",
+      "column_default": null,
+      "is_nullable": "YES",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "initiatives",
+      "column_name": "notes",
+      "data_type": "text",
+      "column_default": null,
+      "is_nullable": "YES",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "key_results",
+      "column_name": "id",
+      "data_type": "uuid",
+      "column_default": "gen_random_uuid()",
+      "is_nullable": "NO",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "key_results",
+      "column_name": "created_at",
+      "data_type": "timestamp with time zone",
+      "column_default": "(now() AT TIME ZONE 'utc'::text)",
+      "is_nullable": "NO",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "key_results",
+      "column_name": "assignee_id",
+      "data_type": "uuid",
+      "column_default": null,
+      "is_nullable": "NO",
+      "referenced_table_name": "users",
+      "referenced_column_name": "id"
+    },
+    {
+      "table_name": "key_results",
+      "column_name": "objective_id",
+      "data_type": "uuid",
+      "column_default": null,
+      "is_nullable": "NO",
+      "referenced_table_name": "objectives",
+      "referenced_column_name": "id"
+    },
+    {
+      "table_name": "key_results",
+      "column_name": "indicator_id",
+      "data_type": "uuid",
+      "column_default": null,
+      "is_nullable": "NO",
+      "referenced_table_name": "indicators",
+      "referenced_column_name": "id"
+    },
+    {
+      "table_name": "key_results",
+      "column_name": "updated_at",
+      "data_type": "timestamp with time zone",
+      "column_default": null,
+      "is_nullable": "YES",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "key_results",
+      "column_name": "weight",
+      "data_type": "double precision",
+      "column_default": null,
+      "is_nullable": "NO",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "key_results",
+      "column_name": "impact",
+      "data_type": "double precision",
+      "column_default": "'0'::double precision",
+      "is_nullable": "NO",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "key_results",
+      "column_name": "next_key_result",
+      "data_type": "text",
+      "column_default": null,
+      "is_nullable": "YES",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "key_results",
+      "column_name": "final_forecast_value",
+      "data_type": "double precision",
+      "column_default": null,
+      "is_nullable": "NO",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "key_results",
+      "column_name": "final_target_value",
+      "data_type": "double precision",
+      "column_default": null,
+      "is_nullable": "NO",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "key_results",
+      "column_name": "final_forecast_target_date",
+      "data_type": "date",
+      "column_default": null,
+      "is_nullable": "NO",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "key_results",
+      "column_name": "deleted_at",
+      "data_type": "timestamp with time zone",
+      "column_default": null,
+      "is_nullable": "YES",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "kpis",
+      "column_name": "risk_id",
+      "data_type": "uuid",
+      "column_default": null,
+      "is_nullable": "NO",
+      "referenced_table_name": "risks",
+      "referenced_column_name": "id"
+    },
+    {
+      "table_name": "kpis",
+      "column_name": "risk_id",
+      "data_type": "uuid",
+      "column_default": null,
+      "is_nullable": "NO",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "kpis",
+      "column_name": "indicator_id",
+      "data_type": "uuid",
+      "column_default": null,
+      "is_nullable": "NO",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "kpis",
+      "column_name": "indicator_id",
+      "data_type": "uuid",
+      "column_default": null,
+      "is_nullable": "NO",
+      "referenced_table_name": "indicators",
+      "referenced_column_name": "id"
+    },
+    {
+      "table_name": "kpis",
+      "column_name": "created_at",
+      "data_type": "timestamp with time zone",
+      "column_default": "(now() AT TIME ZONE 'utc'::text)",
+      "is_nullable": "NO",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "kpis",
+      "column_name": "trigger_value",
+      "data_type": "double precision",
+      "column_default": null,
+      "is_nullable": "NO",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "kpis",
+      "column_name": "triggered_if_lower",
+      "data_type": "boolean",
+      "column_default": "false",
+      "is_nullable": "YES",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "levels",
+      "column_name": "id",
+      "data_type": "uuid",
+      "column_default": "gen_random_uuid()",
+      "is_nullable": "NO",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "levels",
+      "column_name": "created_at",
+      "data_type": "timestamp with time zone",
+      "column_default": "(now() AT TIME ZONE 'utc'::text)",
+      "is_nullable": "NO",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "levels",
+      "column_name": "description",
+      "data_type": "text",
+      "column_default": null,
+      "is_nullable": "NO",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "levels",
+      "column_name": "number",
+      "data_type": "bigint",
+      "column_default": null,
+      "is_nullable": "NO",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "levels",
+      "column_name": "company_id",
+      "data_type": "bigint",
+      "column_default": null,
+      "is_nullable": "YES",
+      "referenced_table_name": "companies",
+      "referenced_column_name": "id"
+    },
+    {
+      "table_name": "memberships",
+      "column_name": "user_id",
+      "data_type": "uuid",
+      "column_default": null,
+      "is_nullable": "NO",
+      "referenced_table_name": "users",
+      "referenced_column_name": "id"
+    },
+    {
+      "table_name": "memberships",
+      "column_name": "user_id",
+      "data_type": "uuid",
+      "column_default": null,
+      "is_nullable": "NO",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "memberships",
+      "column_name": "team_id",
+      "data_type": "bigint",
+      "column_default": null,
+      "is_nullable": "NO",
+      "referenced_table_name": "teams",
+      "referenced_column_name": "id"
+    },
+    {
+      "table_name": "memberships",
+      "column_name": "team_id",
+      "data_type": "bigint",
+      "column_default": null,
+      "is_nullable": "NO",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "memberships",
+      "column_name": "created_at",
+      "data_type": "timestamp with time zone",
+      "column_default": "(now() AT TIME ZONE 'utc'::text)",
+      "is_nullable": "NO",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "objectives",
+      "column_name": "id",
+      "data_type": "uuid",
+      "column_default": "gen_random_uuid()",
+      "is_nullable": "NO",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "objectives",
+      "column_name": "created_at",
+      "data_type": "timestamp with time zone",
+      "column_default": "(now() AT TIME ZONE 'utc'::text)",
+      "is_nullable": "NO",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "objectives",
+      "column_name": "title",
+      "data_type": "text",
+      "column_default": null,
+      "is_nullable": "NO",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "objectives",
+      "column_name": "description",
+      "data_type": "text",
+      "column_default": null,
+      "is_nullable": "NO",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "objectives",
+      "column_name": "updated_at",
+      "data_type": "timestamp with time zone",
+      "column_default": null,
+      "is_nullable": "YES",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "objectives",
+      "column_name": "team_id",
+      "data_type": "bigint",
+      "column_default": null,
+      "is_nullable": "NO",
+      "referenced_table_name": "teams",
+      "referenced_column_name": "id"
+    },
+    {
+      "table_name": "objectives",
+      "column_name": "deleted_at",
+      "data_type": "timestamp with time zone",
+      "column_default": null,
+      "is_nullable": "YES",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "reports",
+      "column_name": "id",
+      "data_type": "bigint",
+      "column_default": "nextval('reports_id_seq'::regclass)",
+      "is_nullable": "NO",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "reports",
+      "column_name": "created_at",
+      "data_type": "timestamp with time zone",
+      "column_default": "(now() AT TIME ZONE 'utc'::text)",
+      "is_nullable": "NO",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "reports",
+      "column_name": "team_id",
+      "data_type": "bigint",
+      "column_default": null,
+      "is_nullable": "NO",
+      "referenced_table_name": "teams",
+      "referenced_column_name": "id"
+    },
+    {
+      "table_name": "reports",
+      "column_name": "reporter_id",
+      "data_type": "uuid",
+      "column_default": null,
+      "is_nullable": "NO",
+      "referenced_table_name": "users",
+      "referenced_column_name": "id"
+    },
+    {
+      "table_name": "reports",
+      "column_name": "start_date",
+      "data_type": "date",
+      "column_default": null,
+      "is_nullable": "NO",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "reports",
+      "column_name": "tracking_date",
+      "data_type": "date",
+      "column_default": null,
+      "is_nullable": "NO",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "reports",
+      "column_name": "next_target_date",
+      "data_type": "date",
+      "column_default": null,
+      "is_nullable": "NO",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "reports",
+      "column_name": "reviewer_id",
+      "data_type": "uuid",
+      "column_default": null,
+      "is_nullable": "NO",
+      "referenced_table_name": "users",
+      "referenced_column_name": "id"
+    },
+    {
+      "table_name": "reports",
+      "column_name": "reviewed_at",
+      "data_type": "timestamp with time zone",
+      "column_default": null,
+      "is_nullable": "YES",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "reports",
+      "column_name": "impact_points",
+      "data_type": "double precision",
+      "column_default": null,
+      "is_nullable": "YES",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "reports",
+      "column_name": "report_rate",
+      "data_type": "double precision",
+      "column_default": null,
+      "is_nullable": "YES",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "reports",
+      "column_name": "review_rate",
+      "data_type": "double precision",
+      "column_default": null,
+      "is_nullable": "YES",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "reports",
+      "column_name": "performance_score_reported",
+      "data_type": "double precision",
+      "column_default": null,
+      "is_nullable": "YES",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "reports",
+      "column_name": "result_type",
+      "data_type": "integer",
+      "column_default": null,
+      "is_nullable": "YES",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "reports",
+      "column_name": "reporter_notes",
+      "data_type": "text",
+      "column_default": null,
+      "is_nullable": "YES",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "reports",
+      "column_name": "closed_at",
+      "data_type": "timestamp with time zone",
+      "column_default": null,
+      "is_nullable": "YES",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "reports",
+      "column_name": "reviewer_notes",
+      "data_type": "text",
+      "column_default": null,
+      "is_nullable": "YES",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "result_next",
+      "column_name": "id",
+      "data_type": "uuid",
+      "column_default": "gen_random_uuid()",
+      "is_nullable": "NO",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "result_next",
+      "column_name": "report_id",
+      "data_type": "bigint",
+      "column_default": null,
+      "is_nullable": "NO",
+      "referenced_table_name": "reports",
+      "referenced_column_name": "id"
+    },
+    {
+      "table_name": "result_next",
+      "column_name": "key_result_id",
+      "data_type": "uuid",
+      "column_default": null,
+      "is_nullable": "NO",
+      "referenced_table_name": "key_results",
+      "referenced_column_name": "id"
+    },
+    {
+      "table_name": "result_next",
+      "column_name": "created_at",
+      "data_type": "timestamp with time zone",
+      "column_default": "(now() AT TIME ZONE 'utc'::text)",
+      "is_nullable": "NO",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "result_next",
+      "column_name": "updated_at",
+      "data_type": "timestamp with time zone",
+      "column_default": null,
+      "is_nullable": "YES",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "result_next",
+      "column_name": "forecast_value_reported",
+      "data_type": "double precision",
+      "column_default": null,
+      "is_nullable": "NO",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "result_next",
+      "column_name": "target_value_reported",
+      "data_type": "double precision",
+      "column_default": null,
+      "is_nullable": "NO",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "result_next",
+      "column_name": "forecast_value_reviewed",
+      "data_type": "double precision",
+      "column_default": null,
+      "is_nullable": "YES",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "result_next",
+      "column_name": "target_value_reviewed",
+      "data_type": "double precision",
+      "column_default": null,
+      "is_nullable": "YES",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "result_next",
+      "column_name": "notes",
+      "data_type": "text",
+      "column_default": null,
+      "is_nullable": "YES",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "result_tracked",
+      "column_name": "id",
+      "data_type": "uuid",
+      "column_default": "gen_random_uuid()",
+      "is_nullable": "NO",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "result_tracked",
+      "column_name": "report_id",
+      "data_type": "bigint",
+      "column_default": null,
+      "is_nullable": "NO",
+      "referenced_table_name": "reports",
+      "referenced_column_name": "id"
+    },
+    {
+      "table_name": "result_tracked",
+      "column_name": "key_result_id",
+      "data_type": "uuid",
+      "column_default": null,
+      "is_nullable": "NO",
+      "referenced_table_name": "key_results",
+      "referenced_column_name": "id"
+    },
+    {
+      "table_name": "result_tracked",
+      "column_name": "created_at",
+      "data_type": "timestamp with time zone",
+      "column_default": "(now() AT TIME ZONE 'utc'::text)",
+      "is_nullable": "NO",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "result_tracked",
+      "column_name": "updated_at",
+      "data_type": "timestamp with time zone",
+      "column_default": null,
+      "is_nullable": "YES",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "result_tracked",
+      "column_name": "forecast_value",
+      "data_type": "double precision",
+      "column_default": null,
+      "is_nullable": "NO",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "result_tracked",
+      "column_name": "target_value",
+      "data_type": "double precision",
+      "column_default": null,
+      "is_nullable": "NO",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "result_tracked",
+      "column_name": "intervall_source",
+      "data_type": "integer",
+      "column_default": null,
+      "is_nullable": "NO",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "result_tracked",
+      "column_name": "actual_result_value",
+      "data_type": "double precision",
+      "column_default": null,
+      "is_nullable": "NO",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "result_tracked",
+      "column_name": "performance_score",
+      "data_type": "double precision",
+      "column_default": null,
+      "is_nullable": "NO",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "result_tracked",
+      "column_name": "result_type",
+      "data_type": "integer",
+      "column_default": null,
+      "is_nullable": "NO",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "result_tracked",
+      "column_name": "weight_reported",
+      "data_type": "integer",
+      "column_default": null,
+      "is_nullable": "NO",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "result_tracked",
+      "column_name": "weight_reviewed",
+      "data_type": "integer",
+      "column_default": null,
+      "is_nullable": "YES",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "result_tracked",
+      "column_name": "impact_points",
+      "data_type": "double precision",
+      "column_default": null,
+      "is_nullable": "NO",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "result_tracked",
+      "column_name": "notes",
+      "data_type": "text",
+      "column_default": null,
+      "is_nullable": "YES",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "risks",
+      "column_name": "id",
+      "data_type": "uuid",
+      "column_default": "gen_random_uuid()",
+      "is_nullable": "NO",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "risks",
+      "column_name": "created_at",
+      "data_type": "timestamp with time zone",
+      "column_default": "(now() AT TIME ZONE 'utc'::text)",
+      "is_nullable": "NO",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "risks",
+      "column_name": "description",
+      "data_type": "text",
+      "column_default": null,
+      "is_nullable": "NO",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "risks",
+      "column_name": "key_result_id",
+      "data_type": "uuid",
+      "column_default": null,
+      "is_nullable": "NO",
+      "referenced_table_name": "key_results",
+      "referenced_column_name": "id"
+    },
+    {
+      "table_name": "risks",
+      "column_name": "is_red",
+      "data_type": "boolean",
+      "column_default": null,
+      "is_nullable": "YES",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "risks",
+      "column_name": "relative_impact",
+      "data_type": "double precision",
+      "column_default": "'0'::double precision",
+      "is_nullable": "NO",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "risks",
+      "column_name": "overall_impact",
+      "data_type": "double precision",
+      "column_default": "'0'::double precision",
+      "is_nullable": "NO",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "risks",
+      "column_name": "deleted_at",
+      "data_type": "timestamp with time zone",
+      "column_default": null,
+      "is_nullable": "YES",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "teams",
+      "column_name": "id",
+      "data_type": "bigint",
+      "column_default": "nextval('teams_id_seq'::regclass)",
+      "is_nullable": "NO",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "teams",
+      "column_name": "created_at",
+      "data_type": "timestamp with time zone",
+      "column_default": "(now() AT TIME ZONE 'utc'::text)",
+      "is_nullable": "NO",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "teams",
+      "column_name": "name",
+      "data_type": "text",
+      "column_default": null,
+      "is_nullable": "NO",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "teams",
+      "column_name": "team_leader_id",
+      "data_type": "uuid",
+      "column_default": null,
+      "is_nullable": "NO",
+      "referenced_table_name": "users",
+      "referenced_column_name": "id"
+    },
+    {
+      "table_name": "teams",
+      "column_name": "reporting_months",
+      "data_type": "integer",
+      "column_default": null,
+      "is_nullable": "NO",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "teams",
+      "column_name": "impact",
+      "data_type": "integer",
+      "column_default": null,
+      "is_nullable": "NO",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "teams",
+      "column_name": "cluster_id",
+      "data_type": "uuid",
+      "column_default": null,
+      "is_nullable": "NO",
+      "referenced_table_name": "clusters",
+      "referenced_column_name": "id"
+    },
+    {
+      "table_name": "teams",
+      "column_name": "type",
+      "data_type": "text",
+      "column_default": null,
+      "is_nullable": "NO",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "teams",
+      "column_name": "company_id",
+      "data_type": "bigint",
+      "column_default": null,
+      "is_nullable": "NO",
+      "referenced_table_name": "companies",
+      "referenced_column_name": "id"
+    },
+    {
+      "table_name": "teams",
+      "column_name": "last_tracking_date",
+      "data_type": "date",
+      "column_default": null,
+      "is_nullable": "YES",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "teams",
+      "column_name": "deleted_at",
+      "data_type": "timestamp with time zone",
+      "column_default": null,
+      "is_nullable": "YES",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "teams",
+      "column_name": "notes",
+      "data_type": "text",
+      "column_default": null,
+      "is_nullable": "YES",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "users",
+      "column_name": "id",
+      "data_type": "uuid",
+      "column_default": "gen_random_uuid()",
+      "is_nullable": "NO",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "users",
+      "column_name": "created_at",
+      "data_type": "timestamp with time zone",
+      "column_default": "(now() AT TIME ZONE 'utc'::text)",
+      "is_nullable": "NO",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "users",
+      "column_name": "name",
+      "data_type": "text",
+      "column_default": null,
+      "is_nullable": "NO",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "users",
+      "column_name": "surname",
+      "data_type": "text",
+      "column_default": null,
+      "is_nullable": "NO",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "users",
+      "column_name": "auth_id",
+      "data_type": "uuid",
+      "column_default": null,
+      "is_nullable": "NO",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "users",
+      "column_name": "email",
+      "data_type": "text",
+      "column_default": null,
+      "is_nullable": "NO",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "users",
+      "column_name": "avatar",
+      "data_type": "text",
+      "column_default": null,
+      "is_nullable": "YES",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "users",
+      "column_name": "deleted_at",
+      "data_type": "timestamp with time zone",
+      "column_default": null,
+      "is_nullable": "YES",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "values",
+      "column_name": "id",
+      "data_type": "uuid",
+      "column_default": "gen_random_uuid()",
+      "is_nullable": "NO",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "values",
+      "column_name": "created_at",
+      "data_type": "timestamp with time zone",
+      "column_default": "(now() AT TIME ZONE 'utc'::text)",
+      "is_nullable": "NO",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "values",
+      "column_name": "value",
+      "data_type": "double precision",
+      "column_default": null,
+      "is_nullable": "NO",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "values",
+      "column_name": "date",
+      "data_type": "date",
+      "column_default": null,
+      "is_nullable": "NO",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "values",
+      "column_name": "indicator_id",
+      "data_type": "uuid",
+      "column_default": null,
+      "is_nullable": "NO",
+      "referenced_table_name": "indicators",
+      "referenced_column_name": "id"
+    },
+    {
+      "table_name": "values",
+      "column_name": "updated_at",
+      "data_type": "timestamp with time zone",
+      "column_default": null,
+      "is_nullable": "YES",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    },
+    {
+      "table_name": "values",
+      "column_name": "updated_by",
+      "data_type": "uuid",
+      "column_default": null,
+      "is_nullable": "YES",
+      "referenced_table_name": "users",
+      "referenced_column_name": "id"
+    },
+    {
+      "table_name": "values",
+      "column_name": "deleted_at",
+      "data_type": "timestamp with time zone",
+      "column_default": null,
+      "is_nullable": "YES",
+      "referenced_table_name": null,
+      "referenced_column_name": null
+    }
+  ]

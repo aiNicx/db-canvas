@@ -1,31 +1,35 @@
-
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { v4 as uuidv4 } from "uuid";
-import ReactFlow, {
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { v4 as uuidv4 } from 'uuid';
+import * as dagre from 'dagre';
+import ReactFlow, { // Keep ReactFlow as default import
   Background,
   Controls,
   MiniMap,
   BackgroundVariant,
-  Node,
-  Edge,
   useNodesState,
   useEdgesState,
   addEdge,
   ConnectionLineType,
+  getBezierPath,
+  applyEdgeChanges,
+  applyNodeChanges
+} from 'reactflow';
+import type { // Import types separately
+  Node,
+  Edge,
   Connection,
   EdgeTypes,
-  getBezierPath,
   EdgeChange,
-  applyEdgeChanges,
-  NodeChange,        // Added
-  applyNodeChanges,  // Added
-} from "reactflow";
+  NodeChange
+} from 'reactflow';
 import { Project, TableNode, Connection as DBConnection } from "@/types/schema";
 import { TableNodeComponent } from "./TableNodeComponent";
-import { useProject } from "@/hooks/useProject"; // Updated import path
+import { useProject } from "@/hooks/useProject";
 import { toast } from "sonner";
-import { FloatingEdge } from "./FloatingEdge"; // Import the extracted component
+import { FloatingEdge } from "./FloatingEdge";
 import { useClipboardHandling } from '@/hooks/useClipboardHandling';
+import { LayoutDashboard } from 'lucide-react';
+import { Button } from "@/components/ui/button";
 import "reactflow/dist/style.css";
 
 interface DBCanvasProps {
@@ -44,10 +48,122 @@ const nodeTypes = {
 const edgeTypes: EdgeTypes = {
   floating: FloatingEdge,
 };
-
+ 
 export function DBCanvas({ project, showGrid, onEditTable }: DBCanvasProps): JSX.Element {
   const { connectionsApi, tablesApi, currentProject } = useProject();
+ 
+  // Initialize state hooks with initial data (Moved up)
+  // Note: reactFlowNodes/Edges are defined later, but hooks need initial values.
+  // We'll use empty arrays initially and rely on useEffect to populate them.
+  const [nodes, setNodes, onNodesChangeInternal] = useNodesState([]);
+  const [edges, setEdges, onEdgesChangeInternal] = useEdgesState([]);
+ 
+  // Function to calculate optimal positions using Dagre
+  const calculateAutoLayout = useCallback(() => {
+    if (!currentProject || !nodes || nodes.length === 0) {
+       console.log("Auto Layout: Missing project or nodes.");
+       return;
+    }
+    console.log("Calculating Auto Layout using Dagre...");
 
+    const dagreGraph = new dagre.graphlib.Graph();
+    dagreGraph.setDefaultEdgeLabel(() => ({}));
+    // Configure layout options (Top-to-bottom, increased spacing)
+    dagreGraph.setGraph({ rankdir: 'TB', nodesep: 100, ranksep: 150 });
+
+    const nodeWidth = 250; // Define node dimensions for Dagre
+    const nodeHeight = 200; // Adjust based on your TableNodeComponent size
+
+    // Add nodes to Dagre graph
+    nodes.forEach((node) => {
+       // Ensure node dimensions are provided
+       dagreGraph.setNode(node.id, {
+         label: node.data.name,
+         width: node.width ?? nodeWidth, // Use actual width if available, else default
+         height: node.height ?? nodeHeight // Use actual height if available, else default
+       });
+    });
+
+    // Add edges to Dagre graph (Dagre expects source -> target)
+    // Our connections are stored FK -> PK (sourceId -> targetId)
+    // Dagre needs PK -> FK (targetId -> sourceId) for TB layout
+    currentProject.connections.forEach((conn) => {
+       // Ensure both source and target nodes exist in the graph before adding edge
+       if (dagreGraph.hasNode(conn.targetId) && dagreGraph.hasNode(conn.sourceId)) {
+         dagreGraph.setEdge(conn.targetId, conn.sourceId);
+       } else {
+         console.warn(`Skipping edge for connection ${conn.id} due to missing node(s).`);
+       }
+    });
+
+    try {
+      dagre.layout(dagreGraph);
+      console.log("Dagre layout calculated.");
+    } catch (e) {
+      console.error("Dagre layout failed:", e);
+      toast.error("Auto-layout calculation failed.");
+      return;
+    }
+
+    const positions: Record<string, { x: number; y: number }> = {};
+    dagreGraph.nodes().forEach((nodeId) => {
+      const node = dagreGraph.node(nodeId);
+      if (node) {
+        // Dagre calculates center position, adjust for top-left corner used by React Flow
+        positions[nodeId] = { x: node.x - (node.width ?? nodeWidth) / 2, y: node.y - (node.height ?? nodeHeight) / 2 };
+      }
+    });
+
+    // 4. Prepare updates (Keep existing logic, but use Dagre positions)
+    const nodeUpdates: { id: string; position: { x: number; y: number } }[] = [];
+    const tables = currentProject.tables; // Need tables for persistence step
+    tables.forEach(table => {
+      if (positions[table.id]) {
+        // Log the specific position calculated
+        console.log(`Calculated position for table ${table.id}: {x: ${positions[table.id].x}, y: ${positions[table.id].y}}`);
+        nodeUpdates.push({ id: table.id, position: positions[table.id] });
+      } else {
+        console.log(`No position calculated for table ${table.id}`);
+      }
+    });
+    console.log("Finished calculating all positions.");
+ 
+    // 5. Update React Flow nodes state once
+    if (nodeUpdates.length > 0) {
+       console.log("Applying batch node position updates to React Flow state...");
+       setNodes((nds) =>
+         nds.map((node) => {
+           const update = nodeUpdates.find((upd) => upd.id === node.id);
+           if (update) {
+             // console.log(`  - Applying position {x: ${update.position.x}, y: ${update.position.y}} to node ${node.id}`); // Optional: log individual application
+             return { ...node, position: update.position };
+           }
+           return node;
+         })
+       );
+    } else {
+       console.log("No node updates to apply to React Flow state.");
+    }
+ 
+    // 6. Persist changes individually (assuming no batch update API)
+    // Run this *after* updating the local state to avoid potential re-render conflicts
+    if (nodeUpdates.length > 0) {
+      console.log("Persisting individual table position updates...");
+      nodeUpdates.forEach(update => {
+        const tableToUpdate = tables.find(t => t.id === update.id);
+        if (tableToUpdate) {
+          // console.log(`  - Persisting position for table ${update.id}`); // Optional: log individual persistence
+          tablesApi.updateTable({
+            ...tableToUpdate,
+            position: update.position
+          });
+        }
+      });
+      console.log("Finished persisting updates.");
+    }
+ 
+  }, [currentProject, tablesApi, setNodes]); // Dependencies remain the same
+ 
   // Convert tables/connections for initial state and updates
   const reactFlowNodes: Node[] = useMemo(
     () =>
@@ -60,19 +176,23 @@ export function DBCanvas({ project, showGrid, onEditTable }: DBCanvasProps): JSX
   const reactFlowEdges: Edge[] = useMemo(
     () =>
       project.connections.map((connection) => ({
-        id: connection.id, source: connection.sourceId, target: connection.targetId,
-        sourceHandle: connection.sourceField, targetHandle: `${connection.targetField}-left`,
+        id: connection.id,
+        // Reverse source and target for visual representation (PK -> FK)
+        source: connection.targetId, // Table with the referenced PK
+        target: connection.sourceId, // Table with the FK
+        sourceHandle: connection.targetField, // PK field name (connects to right handle of PK table)
+        targetHandle: `${connection.sourceField}-left`, // FK field name (connects to left handle of FK table)
         type: "floating", animated: true, zIndex: 10,
         style: { strokeWidth: 2, stroke: 'hsl(var(--primary))' },
         data: { relationshipType: connection.relationshipType }, markerEnd: 'arrow' as const,
       })),
     [project.connections]
   );
-
-  // Initialize state hooks with initial data
-  const [nodes, setNodes, onNodesChangeInternal] = useNodesState(reactFlowNodes);
-  const [edges, setEdges, onEdgesChangeInternal] = useEdgesState(reactFlowEdges);
-
+ 
+  // Removed duplicate state hook initializations
+  // const [nodes, setNodes, onNodesChangeInternal] = useNodesState(reactFlowNodes);
+  // const [edges, setEdges, onEdgesChangeInternal] = useEdgesState(reactFlowEdges);
+ 
   // Effect to update nodes/edges when reactFlowNodes/reactFlowEdges change (e.g., project loaded/updated)
   // This replaces the previous problematic useEffect
   useEffect(() => {
@@ -178,13 +298,15 @@ export function DBCanvas({ project, showGrid, onEditTable }: DBCanvasProps): JSX
             ...tableToUpdate,
             position: node.position
           });
+          // Update React Flow state immediately
+          setNodes((nds) => nds.map((n) => (n.id === node.id ? { ...n, position: node.position } : n)));
           // The project state will be updated automatically by the updateTable call
           // via the updateProject callback passed to the hook.
         }
       }
     },
     // Use currentProject in dependency array
-    [currentProject, tablesApi] // Removed setNodes
+    [currentProject, tablesApi, setNodes] // Added setNodes
   );
 
 
@@ -219,11 +341,21 @@ export function DBCanvas({ project, showGrid, onEditTable }: DBCanvasProps): JSX
   );
 
 
-  return (
-    <div className="h-full w-full bg-canvas-background">
-      <ReactFlow
-        nodes={nodes}
-        edges={edges}
+ return (
+   <div className="h-full w-full bg-canvas-background relative"> {/* Added relative positioning */}
+     {/* Moved Button outside ReactFlow and adjusted styling */}
+     <Button
+       variant="outline"
+       size="icon" // Changed to icon size
+       onClick={calculateAutoLayout}
+       className="absolute left-4 top-4 z-50" // Increased z-index
+       title="Auto-layout tables based on relationships"
+     >
+       <LayoutDashboard className="h-4 w-4" /> {/* Added icon */}
+     </Button>
+     <ReactFlow
+       nodes={nodes}
+       edges={edges}
         onNodesChange={handleNodesChange}
         onEdgesChange={handleEdgesChange} // Use custom handler
         onConnect={onConnect}
