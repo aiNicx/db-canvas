@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { useProject } from '@/contexts/ProjectContext';
+import { useProject } from '@/hooks/useProject'; // Updated import path
 import { TableNode } from '@/types/schema';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -22,11 +22,12 @@ interface SidebarProps {
   onEditTable?: (tableId: string) => void;
 }
 
+
 export function Sidebar({ onEditTable }: SidebarProps) {
-  const { currentProject, deleteTable, updateProject } = useProject();
+  // Destructure correctly: get tablesApi and updateFullProject
+  const { currentProject, tablesApi, updateFullProject } = useProject();
   const [collapsed, setCollapsed] = useState(false);
   const [selectedTable, setSelectedTable] = useState<TableNode | null>(null);
-
   const tableColors = [
     { name: "Default", value: "" },
     { name: "Blue", value: "blue" },
@@ -77,7 +78,7 @@ export function Sidebar({ onEditTable }: SidebarProps) {
 
   const handleDeleteTable = (tableId: string, tableName: string) => {
     if (confirm(`Are you sure you want to delete table "${tableName}"?`)) {
-      deleteTable(tableId);
+      tablesApi.deleteTable(tableId); // Use tablesApi
       if (selectedTable?.id === tableId) {
         setSelectedTable(null);
       }
@@ -95,7 +96,7 @@ export function Sidebar({ onEditTable }: SidebarProps) {
       return t;
     });
     
-    updateProject({
+    updateFullProject({ // Use updateFullProject
       ...currentProject,
       tables: updatedTables,
     });

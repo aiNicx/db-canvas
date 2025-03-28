@@ -1,3 +1,6 @@
+import { useTables } from "@/hooks/useTables";
+import { useConnections } from "@/hooks/useConnections";
+
 
 export interface Position {
   x: number;
@@ -51,4 +54,20 @@ export interface SQLExportOptions {
   dialect: "mysql" | "postgresql" | "sqlite";
   includeDropStatements: boolean;
   includeTimestamps: boolean;
+}
+
+
+// Type for the Project Context
+export interface ProjectContextType {
+  projects: Project[];
+  currentProject: Project | null;
+  tablesApi: ReturnType<typeof useTables>;
+  connectionsApi: ReturnType<typeof useConnections>;
+  createProject: (name: string) => Project;
+  openProject: (id: string) => void;
+  deleteProject: (id: string) => void;
+  duplicateProject: (id: string) => void;
+  // Update function now accepts an updater function for safe state updates
+  updateFullProject: (updater: (prevProject: Project | null) => Project) => void;
+  exportProjectSQL: (id: string, dbType: "mysql" | "postgresql" | "sqlite") => string; // Added export function
 }

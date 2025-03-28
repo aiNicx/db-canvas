@@ -21,7 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useProject } from "@/contexts/ProjectContext";
+import { useProject } from "@/hooks/useProject"; // Updated import path
 import { toast } from "sonner";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
@@ -58,7 +58,7 @@ export function EditTableDialog({
   onOpenChange,
   table,
 }: EditTableDialogProps) {
-  const { updateTable } = useProject();
+  const { tablesApi } = useProject(); // Destructure tablesApi instead
   const [tableName, setTableName] = useState(table.name);
   const [tableColor, setTableColor] = useState(table.color || "");
   const [fields, setFields] = useState<Omit<Field, "foreignKey">[]>([]);
@@ -131,8 +131,8 @@ export function EditTableDialog({
       };
     });
 
-    // Update the table with the new color
-    updateTable({
+    // Update the table using tablesApi
+    tablesApi.updateTable({
       ...table,
       name: tableName,
       color: tableColor,

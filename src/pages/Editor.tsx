@@ -1,8 +1,8 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { useProject } from "@/contexts/ProjectContext";
-import { TableNode } from "@/types/schema";
+import { useProject } from "@/hooks/useProject"; // Updated import path
+import { TableNode, Position } from "@/types/schema"; // Added Position import
 import { DBCanvas } from "@/components/DBCanvas";
 import { Sidebar } from "@/components/Sidebar";
 import { Button } from "@/components/ui/button";
@@ -15,7 +15,8 @@ import { EditTableDialog } from "@/components/EditTableDialog";
 const Editor = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { projects, openProject, currentProject, updateProject, addTable, exportProjectSQL } = useProject();
+  // Destructure correctly: get tablesApi, remove non-existent/unused props
+  const { openProject, currentProject, tablesApi, exportProjectSQL } = useProject(); // Added exportProjectSQL
   const [showGrid, setShowGrid] = useState(true);
   const [showAddTable, setShowAddTable] = useState(false);
   const [editingTable, setEditingTable] = useState<TableNode | null>(null);
@@ -56,8 +57,8 @@ const Editor = () => {
         y: Math.random() * 200 + 100 
       };
       
-      // Add the table to the project
-      addTable(tableData, position);
+      // Use tablesApi to add the table
+      tablesApi.addTable(tableData, position);
       
       setShowAddTable(false);
       toast.success(`Table "${tableData.name}" added`);

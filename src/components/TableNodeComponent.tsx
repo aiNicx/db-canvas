@@ -73,21 +73,28 @@ export const TableNodeComponent = memo((props: ExtendedTableNodeProps) => {
               {field.primary ? (
                 <KeyRound className="h-4 w-4 text-amber-500" />
               ) : field.foreignKey ? (
-                <Link className="h-4 w-4 text-blue-400" />
+                <div className="flex items-center gap-1 group relative">
+                  <Link className="h-4 w-4 text-blue-400" />
+                  <span className="text-xs text-blue-300 truncate max-w-[80px]">
+                    {field.foreignKey.tableId.substring(0, 8)}...
+                  </span>
+                  <div className="absolute left-full ml-2 px-2 py-1 text-xs bg-slate-800 text-white rounded opacity-0 group-hover:opacity-100 transition-opacity z-10 whitespace-nowrap">
+                    References: {field.foreignKey.tableId}.{field.foreignKey.fieldName}
+                  </div>
+                </div>
               ) : null}
             </div>
             
             {/* Field name */}
-            <div className="field-name flex-1 font-medium text-base truncate">{field.name}</div>
-            
+            <div className="field-name flex-1 font-medium text-sm truncate max-w-[100px]">{field.name}</div>
             {/* Field type badge */}
-            <div className="field-type text-xs bg-slate-800 px-2 py-1 rounded text-slate-300 uppercase">
-              {field.type}
+            <div className="field-type text-xs bg-slate-800 px-2 py-0.5 rounded text-slate-300 uppercase">
+              {field.type.length > 8 ? `${field.type.substring(0, 8)}...` : field.type}
             </div>
             
-            {/* Field constraints */}
-            {field.notNull && (
-              <div className="ml-1 text-xs bg-slate-700 px-1.5 py-0.5 rounded text-white font-medium">
+            {/* Field constraints - only show if not primary/FK */}
+            {field.notNull && !field.primary && !field.foreignKey && (
+              <div className="ml-1 text-[10px] bg-slate-700 px-1 py-0.5 rounded text-white font-medium">
                 NN
               </div>
             )}

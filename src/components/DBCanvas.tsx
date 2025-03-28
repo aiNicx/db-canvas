@@ -17,7 +17,7 @@ import ReactFlow, {
 } from "reactflow";
 import { Project, TableNode, Connection as DBConnection } from "@/types/schema";
 import { TableNodeComponent } from "./TableNodeComponent";
-import { useProject } from "@/contexts/ProjectContext";
+import { useProject } from "@/hooks/useProject"; // Updated import path
 import { toast } from "sonner";
 import "reactflow/dist/style.css";
 
@@ -52,18 +52,36 @@ const FloatingEdge = ({
   });
 
   return (
-    <path
-      id={id}
-      style={{
-        ...style,
-        strokeWidth: 2,
-        stroke: 'hsl(var(--primary))',
-        strokeDasharray: data?.relationshipType === "oneToMany" ? "5 5" : undefined,
-      }}
-      className="react-flow__edge-path"
-      d={edgePath}
-      markerEnd={markerEnd}
-    />
+    <>
+      <path
+        id={id}
+        style={{
+          ...style,
+          strokeWidth: 2,
+          stroke: 'hsl(var(--primary))',
+          strokeDasharray: data?.relationshipType === "oneToMany" ? "5 5" : undefined,
+        }}
+        className="react-flow__edge-path"
+        d={edgePath}
+        markerEnd={markerEnd}
+      />
+      <text
+        dy={-5}
+        style={{
+          fontSize: 10,
+          fill: 'hsl(var(--primary))',
+          fontWeight: 'bold',
+        }}
+      >
+        <textPath
+          href={`#${id}`}
+          startOffset="50%"
+          textAnchor="middle"
+        >
+          {data?.relationshipType === "oneToMany" ? "1:N" : "1:1"}
+        </textPath>
+      </text>
+    </>
   );
 };
 
@@ -76,8 +94,10 @@ const edgeTypes: EdgeTypes = {
   floating: FloatingEdge,
 };
 
-export function DBCanvas({ project, showGrid, onEditTable }: DBCanvasProps) {
-  const { updateProject, addConnection } = useProject();
+export function DBCanvas({ project, showGrid, onEditTable }: DBCanvasProps): JSX.Element {
+  const { connectionsApi, tablesApi, currentProject } = useProject();
+  const [nodes, setNodes, onNodesChange] = useNodesState([]);
+  const [edges, setEdges, onEdgesChange] = useEdgesState([]);
 
   // Convert tables to nodes for React Flow
   const initialNodes: Node[] = useMemo(
@@ -103,121 +123,146 @@ export function DBCanvas({ project, showGrid, onEditTable }: DBCanvasProps) {
         source: connection.sourceId,
         target: connection.targetId,
         sourceHandle: connection.sourceField,
-        targetHandle: `${connection.targetField}-left`, // Updated to match our new handle IDs
+        targetHandle: `${connection.targetField}-left`,
         type: "floating",
         animated: true,
+        zIndex: 10,
+        style: {
+          strokeWidth: 2,
+          stroke: 'hsl(var(--primary))',
+        },
         data: {
           relationshipType: connection.relationshipType,
         },
+        markerEnd: 'arrow' as const,
       })),
-    [project.connections]
+    [project.connections, project.tables]
   );
-
-  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
-  const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
 
   // Update nodes and edges when project changes
   useEffect(() => {
     setNodes(initialNodes);
     setEdges(initialEdges);
-  }, [project, initialNodes, initialEdges, setNodes, setEdges]);
+
+    // Validate and clean up connections after initial load
+    const invalidConnections = project.connections.filter(conn => {
+      const sourceTable = project.tables.find(t => t.id === conn.sourceId);
+      const targetTable = project.tables.find(t => t.id === conn.targetId);
+      return !sourceTable || !targetTable ||
+             !sourceTable.fields.some(f => f.name === conn.sourceField) ||
+             !targetTable.fields.some(f => f.name === conn.targetField);
+    });
+
+    if (invalidConnections.length > 0) {
+      toast.warning(`Found and removed ${invalidConnections.length} invalid connections`);
+      
+      // Remove invalid connections using the API
+      invalidConnections.forEach(conn => {
+        connectionsApi.deleteConnection(conn.id);
+      });
+      
+      // Note: The project state will be updated automatically by the deleteConnection calls
+      // via the updateProject callback passed to the hook. No need to call updateProject here.
+    }
+  }, [project, initialNodes, initialEdges, setNodes, setEdges, connectionsApi, tablesApi]); // Updated dependencies
 
   // Handle new connections
   const onConnect = useCallback(
     (params: Connection) => {
-      // First add the visual edge
-      setEdges((eds) =>
-        addEdge(
-          {
-            ...params,
-            type: "floating",
-            animated: true,
-            data: {
-              relationshipType: "oneToMany", // Default relationship type
-            },
-          },
-          eds
-        )
-      );
+      if (!params.source || !params.target || !params.sourceHandle || !params.targetHandle) {
+        return;
+      }
 
-      // Then add the connection to the project data
-      if (params.source && params.target && params.sourceHandle && params.targetHandle) {
-        try {
-          // Extract the actual field name from the target handle (remove '-left' suffix if present)
-          const targetField = params.targetHandle.endsWith('-left') 
-            ? params.targetHandle.replace('-left', '') 
-            : params.targetHandle;
-          
-          addConnection({
-            sourceId: params.source,
-            targetId: params.target,
-            sourceField: params.sourceHandle,
-            targetField: targetField,
-            relationshipType: "oneToMany", // Default relationship type
-          });
-          
-          // Get source and target table names for better toast message
-          const sourceTable = project.tables.find(t => t.id === params.source)?.name;
-          const targetTable = project.tables.find(t => t.id === params.target)?.name;
-          
-          toast.success(
-            `Relation created: ${sourceTable}.${params.sourceHandle} → ${targetTable}.${targetField}`,
-            { description: "Foreign key relation established" }
-          );
-          
-          // Also update the field information to mark it as a foreign key
-          const updatedTables = project.tables.map(table => {
-            if (table.id === params.source) {
+      // Extract the actual field name from the target handle (remove '-left' suffix if present)
+      const targetField = params.targetHandle.endsWith('-left')
+        ? params.targetHandle.replace('-left', '')
+        : params.targetHandle;
+
+      // First validate the connection would be valid
+      const sourceTable = project.tables.find(t => t.id === params.source);
+      const targetTable = project.tables.find(t => t.id === params.target);
+      
+      if (!sourceTable || !targetTable) {
+        toast.error("Cannot create connection: tables not found");
+        return;
+      }
+
+      const sourceFieldExists = sourceTable.fields.some(f => f.name === params.sourceHandle);
+      const targetFieldExists = targetTable.fields.some(f => f.name === targetField);
+
+      if (!sourceFieldExists || !targetFieldExists) {
+        toast.error("Cannot create connection: fields not found");
+        return;
+      }
+
+      // Try to add the connection to the project data first
+      try {
+        const newConnection = connectionsApi.addConnection({
+          sourceId: params.source,
+          targetId: params.target,
+          sourceField: params.sourceHandle,
+          targetField: targetField,
+          relationshipType: "oneToMany", // Default relationship type
+        });
+
+        if (!newConnection) {
+          return; // Error already shown by addConnection
+        }
+
+        // REMOVED: Immediate visual edge update.
+        // Let the useEffect hook handle edge updates based on project prop changes.
+
+        // Update the source table's field to mark it as a foreign key
+        const updatedSourceTable = {
+          ...sourceTable,
+          fields: sourceTable.fields.map(field => {
+            if (field.name === params.sourceHandle) {
               return {
-                ...table,
-                fields: table.fields.map(field => {
-                  if (field.name === params.sourceHandle) {
-                    return {
-                      ...field,
-                      foreignKey: {
-                        tableId: params.target || "",
-                        fieldName: targetField
-                      }
-                    };
-                  }
-                  return field;
-                })
+                ...field,
+                foreignKey: {
+                  tableId: params.target,
+                  fieldName: targetField
+                }
               };
             }
-            return table;
-          });
-          
-          updateProject({
-            ...project,
-            tables: updatedTables
-          });
-        } catch (error) {
-          console.error("Failed to create relation:", error);
-          toast.error("Failed to create relation");
-        }
+            return field;
+          })
+        };
+        tablesApi.updateTable(updatedSourceTable);
+
+        toast.success(
+          `Relation created: ${sourceTable.name}.${params.sourceHandle} → ${targetTable.name}.${targetField}`,
+          { description: "Foreign key relation established" }
+        );
+
+      } catch (error) {
+        console.error("Failed to create relation:", error);
+        toast.error("Failed to create relation");
       }
     },
-    [setEdges, addConnection, project, updateProject]
+    // Removed setEdges from dependencies as it's no longer called directly
+    [connectionsApi, tablesApi, project.tables]
   );
 
   // This handles node position changes
   const onNodeDragStop = useCallback(
     (event: React.MouseEvent, node: Node) => {
-      // Update the table position in the project
-      if (project && node.id) {
-        const updatedTables = project.tables.map((table) =>
-          table.id === node.id
-            ? { ...table, position: node.position }
-            : table
-        );
-        
-        updateProject({
-          ...project,
-          tables: updatedTables,
-        });
+      // Update the table position using the tables API
+      // Use currentProject from useProject hook
+      if (currentProject && node.id) {
+        const tableToUpdate = currentProject.tables.find(table => table.id === node.id);
+        if (tableToUpdate) {
+          tablesApi.updateTable({
+            ...tableToUpdate,
+            position: node.position
+          });
+          // The project state will be updated automatically by the updateTable call
+          // via the updateProject callback passed to the hook.
+        }
       }
     },
-    [project, updateProject]
+    // Use currentProject in dependency array
+    [currentProject, tablesApi, setNodes]
   );
 
   return (
