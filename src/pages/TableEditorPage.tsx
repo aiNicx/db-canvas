@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { v4 as uuidv4 } from 'uuid';
 import { useParams, useNavigate } from "react-router-dom";
@@ -9,7 +10,7 @@ import { Field, TableNode } from "@/types/schema";
 import { FieldEditorTable } from "@/components/FieldEditorTable";
 import { useProject } from "@/hooks/useProject";
 import { toast } from "sonner";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Separator } from "@/components/ui/separator";
 
 const TABLE_COLORS = [
   { name: "Default", value: "" },
@@ -110,13 +111,11 @@ export function TableEditorPage() {
         {isEditing ? "Edit Table" : "Create New Table"}
       </h1>
       
-      <Tabs defaultValue="details" className="space-y-6">
-        <TabsList>
-          <TabsTrigger value="details">Table Details</TabsTrigger>
-          <TabsTrigger value="fields">Fields</TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="details" className="space-y-4">
+      <div className="space-y-8">
+        {/* Table Details Section */}
+        <div className="space-y-4 bg-slate-900/50 p-6 rounded-lg">
+          <h2 className="text-lg font-semibold mb-4">Table Details</h2>
+          
           <div className="grid gap-4">
             <div className="grid gap-2">
               <Label htmlFor="tableName">Table Name</Label>
@@ -162,18 +161,22 @@ export function TableEditorPage() {
               </RadioGroup>
             </div>
           </div>
-        </TabsContent>
+        </div>
         
-        <TabsContent value="fields" className="space-y-4">
+        <Separator className="my-6" />
+        
+        {/* Fields Section */}
+        <div className="space-y-4 bg-slate-900/50 p-6 rounded-lg">
+          <h2 className="text-lg font-semibold mb-4">Fields</h2>
           <FieldEditorTable
             fields={fields}
             onChange={handleFieldsChange}
             availableTables={availableTablesForFK}
           />
-        </TabsContent>
-      </Tabs>
+        </div>
+      </div>
       
-      <div className="flex justify-end gap-2 mt-6">
+      <div className="flex justify-end gap-2 mt-8">
         <Button variant="outline" onClick={() => navigate(-1)}>
           Cancel
         </Button>
