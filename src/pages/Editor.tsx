@@ -1,23 +1,20 @@
+import { useEffect, useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { useProject } from '@/hooks/useProject'; // Updated import path
+import { DBCanvas } from '@/components/DBCanvas';
+import { Sidebar } from '@/components/Sidebar';
+import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
+import { Database, ArrowLeft, Plus, Download, Grid, Layers } from 'lucide-react';
+import { ThemeToggle } from '@/components/ThemeToggle';
 
-import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import { useProject } from "@/hooks/useProject"; // Updated import path
-import { TableNode, Position } from "@/types/schema"; // Added Position import
-import { DBCanvas } from "@/components/DBCanvas";
-import { Sidebar } from "@/components/Sidebar";
-import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
-import { Database, ArrowLeft, Plus, Save, Download, Grid, Layers } from "lucide-react";
-import { ThemeToggle } from "@/components/ThemeToggle";
-
-const Editor = () => {
+const Editor = (): JSX.Element => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   // Destructure correctly: get tablesApi, remove non-existent/unused props
-  const { openProject, currentProject, tablesApi, exportProjectSQL } = useProject(); // Added exportProjectSQL
+  const { openProject, currentProject, exportProjectSQL } = useProject();
   const [showGrid, setShowGrid] = useState(true);
   const [showAddTable, setShowAddTable] = useState(false);
-  const [editingTable, setEditingTable] = useState<TableNode | null>(null);
 
   useEffect(() => {
     if (id) {
@@ -25,21 +22,20 @@ const Editor = () => {
     }
   }, [id, openProject]);
 
-
   useEffect(() => {
     if (showAddTable && currentProject) {
       navigate(`/editor/${currentProject.id}/tables/new`);
       // Consider if you want to reset showAddTable after navigating
-      // setShowAddTable(false); 
+      // setShowAddTable(false);
     }
   }, [showAddTable, currentProject, navigate]);
 
-  const handleExportSQL = () => {
+  const handleExportSQL = (): void => {
     if (!currentProject) return;
-    
+
     // Generate SQL for PostgreSQL by default
-    const sql = exportProjectSQL(currentProject.id, "postgresql");
-    
+    const sql = exportProjectSQL(currentProject.id, 'postgresql');
+
     // Create a download link
     const blob = new Blob([sql], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
@@ -50,13 +46,12 @@ const Editor = () => {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-    
-    toast.success("SQL exported successfully");
+
+    toast.success('SQL exported successfully');
   };
 
-
-  const handleEditTable = (tableId: string) => {
-    const table = currentProject?.tables.find(t => t.id === tableId);
+  const handleEditTable = (tableId: string): void => {
+    const table = currentProject?.tables.find((t) => t.id === tableId);
     if (table && currentProject) {
       navigate(`/editor/${currentProject.id}/tables/${table.id}`);
     }
@@ -70,7 +65,7 @@ const Editor = () => {
           <Layers className="h-12 w-12 text-primary mx-auto mb-4 animate-float" />
           <h2 className="text-2xl font-semibold mb-2">Loading project...</h2>
           <p className="text-muted-foreground mb-4">Please wait while we load your project.</p>
-          <Button onClick={() => navigate("/")}>
+          <Button onClick={() => navigate('/')}>
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Dashboard
           </Button>
@@ -84,12 +79,7 @@ const Editor = () => {
       <header className="border-b bg-card z-10">
         <div className="container flex h-14 items-center justify-between">
           <div className="flex items-center gap-4">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => navigate("/")}
-              className="mr-2"
-            >
+            <Button variant="ghost" size="icon" onClick={() => navigate('/')} className="mr-2">
               <ArrowLeft className="h-4 w-4" />
             </Button>
             <div className="flex items-center gap-2">
@@ -98,11 +88,11 @@ const Editor = () => {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <Button 
-              variant="outline" 
-              size="icon" 
+            <Button
+              variant="outline"
+              size="icon"
               onClick={() => setShowGrid(!showGrid)}
-              className={showGrid ? "bg-accent" : ""}
+              className={showGrid ? 'bg-accent' : ''}
             >
               <Grid className="h-4 w-4" />
             </Button>
@@ -114,11 +104,7 @@ const Editor = () => {
               <Plus className="h-4 w-4" />
               <span>Add Table</span>
             </Button>
-            <Button
-              variant="outline"
-              className="flex items-center gap-2"
-              onClick={handleExportSQL}
-            >
+            <Button variant="outline" className="flex items-center gap-2" onClick={handleExportSQL}>
               <Download className="h-4 w-4" />
               <span>Export SQL</span>
             </Button>
@@ -129,16 +115,10 @@ const Editor = () => {
 
       <div className="flex-1 flex overflow-hidden">
         <div className="flex-1 relative overflow-hidden">
-          <DBCanvas 
-            project={currentProject} 
-            showGrid={showGrid} 
-            onEditTable={handleEditTable}
-          />
+          <DBCanvas project={currentProject} showGrid={showGrid} onEditTable={handleEditTable} />
         </div>
         <Sidebar onEditTable={handleEditTable} />
       </div>
-
-
     </div>
   );
 };

@@ -1,19 +1,18 @@
-
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { ThemeProvider } from "@/contexts/ThemeContext";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { ProjectProvider } from "./contexts/NewProjectContext";
-import Dashboard from "./pages/Dashboard";
-import Editor from "./pages/Editor";
-import { TableEditorPage } from "./pages/TableEditorPage";
-import NotFound from "./pages/NotFound";
+// Toaster import removed as it's unused
+import { Toaster as Sonner } from '@/components/ui/sonner';
+import { TooltipProvider } from '@/components/ui/tooltip';
+import { ThemeProvider } from '@/contexts/ThemeContext';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { ProjectProvider } from './contexts/NewProjectContext';
+import Dashboard from './pages/Dashboard';
+import Editor from './pages/Editor';
+import { TableEditorPage } from './pages/TableEditorPage';
+import NotFound from './pages/NotFound';
 
 const queryClient = new QueryClient();
 
-const App = () => (
+const App: React.FC = () => (
   <QueryClientProvider client={queryClient}>
     <ThemeProvider>
       <TooltipProvider>

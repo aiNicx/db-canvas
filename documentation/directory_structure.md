@@ -53,3 +53,4 @@
     │   └── NotFound.tsx
     └── types/
         └── schema.ts
+```

@@ -24,7 +24,7 @@ export const FloatingEdge = ({
   style = {},
   data,
   markerEnd,
-}: FloatingEdgeProps) => {
+}: FloatingEdgeProps): JSX.Element => {
   const [edgePath] = getBezierPath({
     sourceX,
     sourceY,
@@ -42,7 +42,7 @@ export const FloatingEdge = ({
           ...style,
           strokeWidth: 2,
           stroke: 'hsl(var(--primary))',
-          strokeDasharray: data?.relationshipType === "oneToMany" ? "5 5" : undefined,
+          strokeDasharray: data?.relationshipType === 'oneToMany' ? '5 5' : undefined,
         }}
         className="react-flow__edge-path"
         d={edgePath}
@@ -57,12 +57,8 @@ export const FloatingEdge = ({
           fontWeight: 'bold',
         }}
       >
-        <textPath
-          href={`#${id}`}
-          startOffset="50%"
-          textAnchor="middle"
-        >
-          {data?.relationshipType === "oneToMany" ? "1:N" : "1:1"}
+        <textPath href={`#${id}`} startOffset="50%" textAnchor="middle">
+          {data?.relationshipType === 'oneToMany' ? '1:N' : '1:1'}
         </textPath>
       </text>
     </>

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { Node } from 'reactflow';
-import { TableNode, Project } from '@/types/schema';
+import { TableNode } from '@/types/schema';
 import { useProject } from './useProject'; // Assuming tablesApi comes from useProject
 
 // Define the arguments the hook will need
@@ -15,13 +15,15 @@ export const useClipboardHandling = ({
   nodes,
   projectTables,
   tablesApi,
-}: UseClipboardHandlingArgs) => {
+}: UseClipboardHandlingArgs): void => {
   // State for the copied table data is now internal to the hook
-  const [copiedTableData, setCopiedTableData] = useState<Omit<TableNode, 'id' | 'position'> | null>(null);
+  const [copiedTableData, setCopiedTableData] = useState<Omit<TableNode, 'id' | 'position'> | null>(
+    null
+  );
 
   // Handle Copy/Paste keyboard shortcuts
   useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
+    const handleKeyDown = (event: KeyboardEvent): void => {
       const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
       const copyKeyPressed = (isMac ? event.metaKey : event.ctrlKey) && event.key === 'c';
       const pasteKeyPressed = (isMac ? event.metaKey : event.ctrlKey) && event.key === 'v';
@@ -34,13 +36,13 @@ export const useClipboardHandling = ({
 
       if (copyKeyPressed) {
         // Find the selected node
-        const selectedNode = nodes.find(node => node.selected);
+        const selectedNode = nodes.find((node) => node.selected);
         if (selectedNode && selectedNode.type === 'table') {
           // Find the full table data from the project tables
-          const tableData = projectTables.find(t => t.id === selectedNode.id);
+          const tableData = projectTables.find((t) => t.id === selectedNode.id);
           if (tableData) {
             // Exclude id and position for copying
-            const { id, position, ...dataToCopy } = tableData;
+            const { ...dataToCopy } = tableData;
             setCopiedTableData(dataToCopy);
             toast.info(`Copied table "${dataToCopy.name}"`);
             event.preventDefault(); // Prevent default browser copy action
@@ -51,8 +53,8 @@ export const useClipboardHandling = ({
       if (pasteKeyPressed && copiedTableData) {
         // Calculate a slightly offset position for the new table
         const pastePosition = { x: 100, y: 100 }; // Simple default position
-        const selectedNode = nodes.find(node => node.selected);
-        if(selectedNode) {
+        const selectedNode = nodes.find((node) => node.selected);
+        if (selectedNode) {
           pastePosition.x = selectedNode.position.x + 50;
           pastePosition.y = selectedNode.position.y + 50;
         }
@@ -60,7 +62,7 @@ export const useClipboardHandling = ({
         const newTableData: Omit<TableNode, 'id' | 'position'> = {
           ...copiedTableData,
           name: `${copiedTableData.name} (Copy)`,
-          fields: copiedTableData.fields.map(field => ({ ...field })) // Shallow copy fields
+          fields: copiedTableData.fields.map((field) => ({ ...field })), // Shallow copy fields
         };
 
         // Call the API to add the new table
@@ -73,7 +75,7 @@ export const useClipboardHandling = ({
     document.addEventListener('keydown', handleKeyDown);
 
     // Cleanup listener on hook unmount
-    return () => {
+    return (): void => {
       document.removeEventListener('keydown', handleKeyDown);
     };
     // Dependencies for the effect within the hook

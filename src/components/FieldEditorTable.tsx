@@ -1,11 +1,24 @@
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Trash2, Plus, GripVertical, Link, Unlink } from "lucide-react";
-import { DataType, Field, COMMON_DATA_TYPES } from "@/types/schema";
-import { useProject } from "@/hooks/useProject";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Trash2, Plus, GripVertical, Link, Unlink } from 'lucide-react';
+import { Field, COMMON_DATA_TYPES } from '@/types/schema';
+// import { useProject } from '@/hooks/useProject'; // Removed unused import
 import {
   DndContext,
   closestCenter,
@@ -15,18 +28,18 @@ import {
   useSensors,
   DragEndEvent,
   DragStartEvent,
-  DragOverEvent
+  DragOverEvent,
 } from '@dnd-kit/core';
 import {
   arrayMove,
   SortableContext,
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
-  useSortable
+  useSortable,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { useState, useEffect } from 'react';
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { useState, useEffect, useMemo, useCallback } from 'react';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { v4 as uuidv4 } from 'uuid';
 
 interface FieldEditorTableProps {
@@ -35,7 +48,18 @@ interface FieldEditorTableProps {
   availableTables?: { id: string; name: string; fields: Field[] }[];
 }
 
-function SortableTableRow({ field, index, handleFieldChange, handleRemoveField, fields, isDragging, isOver, availableTables, handleSetForeignKey, handleRemoveForeignKey }: {
+function SortableTableRow({
+  field,
+  index,
+  handleFieldChange,
+  handleRemoveField,
+  fields,
+  isDragging,
+  isOver,
+  availableTables,
+  handleSetForeignKey,
+  handleRemoveForeignKey,
+}: {
   field: Field;
   index: number;
   handleFieldChange: (index: number, field: Partial<Field>) => void;
@@ -46,32 +70,42 @@ function SortableTableRow({ field, index, handleFieldChange, handleRemoveField, 
   availableTables?: { id: string; name: string; fields: Field[] }[];
   handleSetForeignKey: (index: number, targetTableId: string, targetFieldName: string) => void;
   handleRemoveForeignKey: (index: number) => void;
-}) {
-  const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: field.id }); 
-  const [selectedFkTableId, setSelectedFkTableId] = useState<string | undefined>(field.foreignKey?.tableId);
-  const [selectedFkFieldName, setSelectedFkFieldName] = useState<string | undefined>(field.foreignKey?.fieldName);
+}): JSX.Element {
+  const { attributes, listeners, setNodeRef, transform, transition } = useSortable({
+    id: field.id,
+  });
+  const [selectedFkTableId, setSelectedFkTableId] = useState<string | undefined>(
+    field.foreignKey?.tableId
+  );
+  const [selectedFkFieldName, setSelectedFkFieldName] = useState<string | undefined>(
+    field.foreignKey?.fieldName
+  );
 
   useEffect(() => {
     setSelectedFkTableId(field.foreignKey?.tableId);
     setSelectedFkFieldName(field.foreignKey?.fieldName);
   }, [field.foreignKey]);
 
-  const targetTableFields = availableTables?.find(t => t.id === selectedFkTableId)?.fields || [];
+  const targetTableFields = availableTables?.find((t) => t.id === selectedFkTableId)?.fields || [];
 
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
-    backgroundColor: isDragging ? 'hsl(var(--accent)/0.1)' : isOver ? 'hsl(var(--accent)/0.05)' : undefined,
+    backgroundColor: isDragging
+      ? 'hsl(var(--accent)/0.1)'
+      : isOver
+        ? 'hsl(var(--accent)/0.05)'
+        : undefined,
   };
 
-  const handleDefaultValueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleDefaultValueChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     const value = e.target.value;
     let defaultValue: string | number | boolean | null = value;
     if (value === 'null') defaultValue = null;
     else if (value === 'true') defaultValue = true;
     else if (value === 'false') defaultValue = false;
     else if (!isNaN(Number(value)) && value.trim() !== '') defaultValue = Number(value);
-    
+
     handleFieldChange(index, { defaultValue });
   };
 
@@ -146,9 +180,17 @@ function SortableTableRow({ field, index, handleFieldChange, handleRemoveField, 
               variant="ghost"
               size="icon"
               className={`h-8 w-8 ${field.foreignKey ? 'text-primary hover:text-primary/90' : 'text-muted-foreground hover:text-foreground'}`}
-              title={field.foreignKey ? `Links to ${availableTables?.find(t => t.id === field.foreignKey?.tableId)?.name}.${field.foreignKey.fieldName}` : "Set Foreign Key"}
+              title={
+                field.foreignKey
+                  ? `Links to ${availableTables?.find((t) => t.id === field.foreignKey?.tableId)?.name}.${field.foreignKey.fieldName}`
+                  : 'Set Foreign Key'
+              }
             >
-              {field.foreignKey ? <Link className="h-4 w-4" /> : <Unlink className="h-4 w-4 opacity-50" />}
+              {field.foreignKey ? (
+                <Link className="h-4 w-4" />
+              ) : (
+                <Unlink className="h-4 w-4 opacity-50" />
+              )}
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-60 p-4 space-y-3">
@@ -167,7 +209,7 @@ function SortableTableRow({ field, index, handleFieldChange, handleRemoveField, 
                 <SelectValue placeholder="Target Table" />
               </SelectTrigger>
               <SelectContent>
-                {availableTables?.map(table => (
+                {availableTables?.map((table) => (
                   <SelectItem key={table.id} value={table.id}>
                     {table.name}
                   </SelectItem>
@@ -183,7 +225,7 @@ function SortableTableRow({ field, index, handleFieldChange, handleRemoveField, 
                 <SelectValue placeholder="Target Field" />
               </SelectTrigger>
               <SelectContent>
-                {targetTableFields.map(f => (
+                {targetTableFields.map((f) => (
                   <SelectItem key={f.id} value={f.name}>
                     {f.name} ({f.type})
                   </SelectItem>
@@ -191,25 +233,25 @@ function SortableTableRow({ field, index, handleFieldChange, handleRemoveField, 
               </SelectContent>
             </Select>
             <div className="flex justify-end gap-2 pt-2">
-               <Button 
-                 variant="outline" 
-                 size="sm" 
-                 onClick={() => handleRemoveForeignKey(index)}
-                 disabled={!field.foreignKey}
-               >
-                 Remove
-               </Button>
-               <Button 
-                 size="sm" 
-                 onClick={() => {
-                   if (selectedFkTableId && selectedFkFieldName) {
-                     handleSetForeignKey(index, selectedFkTableId, selectedFkFieldName);
-                   }
-                 }}
-                 disabled={!selectedFkTableId || !selectedFkFieldName}
-               >
-                 Set Link
-               </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handleRemoveForeignKey(index)}
+                disabled={!field.foreignKey}
+              >
+                Remove
+              </Button>
+              <Button
+                size="sm"
+                onClick={() => {
+                  if (selectedFkTableId && selectedFkFieldName) {
+                    handleSetForeignKey(index, selectedFkTableId, selectedFkFieldName);
+                  }
+                }}
+                disabled={!selectedFkTableId || !selectedFkFieldName}
+              >
+                Set Link
+              </Button>
             </div>
           </PopoverContent>
         </Popover>
@@ -230,7 +272,11 @@ function SortableTableRow({ field, index, handleFieldChange, handleRemoveField, 
   );
 }
 
-export function FieldEditorTable({ fields, onChange, availableTables }: FieldEditorTableProps) {
+export function FieldEditorTable({
+  fields,
+  onChange,
+  availableTables,
+}: FieldEditorTableProps): JSX.Element {
   const [activeId, setActiveId] = useState<string | null>(null);
   const [overId, setOverId] = useState<string | null>(null);
 
@@ -241,34 +287,34 @@ export function FieldEditorTable({ fields, onChange, availableTables }: FieldEdi
     })
   );
 
-  const handleDragStart = (event: DragStartEvent) => {
+  const handleDragStart = (event: DragStartEvent): void => {
     setActiveId(event.active.id as string);
   };
 
-  const handleDragOver = (event: DragOverEvent) => {
+  const handleDragOver = (event: DragOverEvent): void => {
     setOverId(event.over?.id as string | null);
   };
 
-  const handleDragEnd = (event: DragEndEvent) => {
-    const {active, over} = event;
+  const handleDragEnd = (event: DragEndEvent): void => {
+    const { active, over } = event;
     setActiveId(null);
     setOverId(null);
-    
+
     if (active.id !== over?.id && over?.id) {
-      const oldIndex = fields.findIndex(field => field.id === active.id); 
-      const newIndex = fields.findIndex(field => field.id === over.id); 
+      const oldIndex = fields.findIndex((field) => field.id === active.id);
+      const newIndex = fields.findIndex((field) => field.id === over.id);
       if (oldIndex !== -1 && newIndex !== -1) {
         onChange(arrayMove(fields, oldIndex, newIndex));
       }
     }
   };
 
-  const handleAddField = () => {
+  const handleAddField = (): void => {
     // Explicitly type the new field object
     const newField: Field = {
-      id: uuidv4(), 
-      name: "", 
-      type: "VARCHAR(255)",
+      id: uuidv4(),
+      name: '',
+      type: 'VARCHAR(255)',
       notNull: false,
       primary: false,
       unique: false,
@@ -276,50 +322,62 @@ export function FieldEditorTable({ fields, onChange, availableTables }: FieldEdi
       foreignKey: undefined,
     };
     // Correctly update state
-    onChange([ ...fields, newField ]); 
+    onChange([...fields, newField]);
   };
 
-  const handleRemoveField = (index: number) => {
-    if (fields.length <= 1) return;
-    const newFields = [...fields];
-    newFields.splice(index, 1);
-    onChange(newFields);
-  };
+  const handleRemoveField = useCallback(
+    (index: number): void => {
+      if (fields.length <= 1) return;
+      const newFields = [...fields];
+      newFields.splice(index, 1);
+      onChange(newFields);
+    },
+    [fields, onChange]
+  );
 
-  const handleFieldChange = (index: number, fieldUpdate: Partial<Field>) => {
-    const newFields = [...fields];
-    const currentId = newFields[index].id; 
-    newFields[index] = { ...newFields[index], ...fieldUpdate, id: currentId }; 
-    
-    if (fieldUpdate.primary) {
-      newFields.forEach((f, i) => {
-        if (i !== index) f.primary = false;
-      });
-    }
+  const handleFieldChange = useCallback(
+    (index: number, fieldUpdate: Partial<Field>): void => {
+      const newFields = [...fields];
+      const currentId = newFields[index].id;
+      newFields[index] = { ...newFields[index], ...fieldUpdate, id: currentId };
 
-    onChange(newFields);
-  };
+      if (fieldUpdate.primary) {
+        newFields.forEach((f, i) => {
+          if (i !== index) f.primary = false;
+        });
+      }
 
-  const handleSetForeignKey = (index: number, targetTableId: string, targetFieldName: string) => {
-    const newFields = [...fields];
-    newFields[index] = { 
-      ...newFields[index], 
-      foreignKey: { tableId: targetTableId, fieldName: targetFieldName } 
-    };
-    onChange(newFields);
-  };
+      onChange(newFields);
+    },
+    [fields, onChange]
+  );
 
-  const handleRemoveForeignKey = (index: number) => {
-    const newFields = [...fields];
-    newFields[index] = { 
-      ...newFields[index], 
-      foreignKey: undefined 
-    };
-    onChange(newFields);
-  };
+  const handleSetForeignKey = useCallback(
+    (index: number, targetTableId: string, targetFieldName: string): void => {
+      const newFields = [...fields];
+      newFields[index] = {
+        ...newFields[index],
+        foreignKey: { tableId: targetTableId, fieldName: targetFieldName },
+      };
+      onChange(newFields);
+    },
+    [fields, onChange]
+  );
+
+  const handleRemoveForeignKey = useCallback(
+    (index: number): void => {
+      const newFields = [...fields];
+      newFields[index] = {
+        ...newFields[index],
+        foreignKey: undefined,
+      };
+      onChange(newFields);
+    },
+    [fields, onChange]
+  );
 
   // This return statement was missing or misplaced in the previous error state
-  return ( 
+  return (
     <div className="space-y-4">
       <div className="max-h-[40vh] overflow-y-auto overflow-x-auto border rounded-md">
         <Table>
@@ -328,12 +386,17 @@ export function FieldEditorTable({ fields, onChange, availableTables }: FieldEdi
               <TableHead className="w-8 px-1"></TableHead> {/* Drag Handle */}
               <TableHead className="pl-2 min-w-[150px]">Name</TableHead> {/* Use min-w */}
               <TableHead className="min-w-[150px]">Type</TableHead> {/* Use min-w */}
-              <TableHead className="w-[70px] text-center px-1">Not Null</TableHead> {/* Slightly smaller */}
-              <TableHead className="w-[70px] text-center px-1">Primary</TableHead> {/* Slightly smaller */}
-              <TableHead className="w-[70px] text-center px-1">Unique</TableHead> {/* Slightly smaller */}
+              <TableHead className="w-[70px] text-center px-1">Not Null</TableHead>{' '}
+              {/* Slightly smaller */}
+              <TableHead className="w-[70px] text-center px-1">Primary</TableHead>{' '}
+              {/* Slightly smaller */}
+              <TableHead className="w-[70px] text-center px-1">Unique</TableHead>{' '}
+              {/* Slightly smaller */}
               <TableHead className="min-w-[120px]">Default Value</TableHead> {/* Use min-w */}
-              <TableHead className="w-[50px] text-center px-1">FK</TableHead> {/* Slightly smaller */}
-              <TableHead className="w-[50px] text-right pr-2"></TableHead> {/* Actions, slightly smaller */}
+              <TableHead className="w-[50px] text-center px-1">FK</TableHead>{' '}
+              {/* Slightly smaller */}
+              <TableHead className="w-[50px] text-right pr-2"></TableHead>{' '}
+              {/* Actions, slightly smaller */}
             </TableRow>
           </TableHeader>
           <DndContext
@@ -344,36 +407,44 @@ export function FieldEditorTable({ fields, onChange, availableTables }: FieldEdi
             onDragEnd={handleDragEnd}
           >
             <SortableContext
-              items={fields.map(field => field.id)} 
+              items={fields.map((field) => field.id)}
               strategy={verticalListSortingStrategy}
             >
               <TableBody>
-                {fields.map((field, index) => (
-                  <SortableTableRow
-                    key={field.id} 
-                    field={field}
-                    index={index}
-                    handleFieldChange={handleFieldChange}
-                    handleRemoveField={handleRemoveField}
-                    fields={fields}
-                    isDragging={activeId === field.id}
-                    isOver={overId === field.id && activeId !== field.id}
-                    availableTables={availableTables}
-                    handleSetForeignKey={handleSetForeignKey}
-                    handleRemoveForeignKey={handleRemoveForeignKey}
-                  />
-                ))}
+                {useMemo(
+                  () =>
+                    fields.map((field, index) => (
+                      <SortableTableRow
+                        key={field.id}
+                        field={field}
+                        index={index}
+                        handleFieldChange={handleFieldChange}
+                        handleRemoveField={handleRemoveField}
+                        fields={fields}
+                        isDragging={activeId === field.id}
+                        isOver={overId === field.id && activeId !== field.id}
+                        availableTables={availableTables}
+                        handleSetForeignKey={handleSetForeignKey}
+                        handleRemoveForeignKey={handleRemoveForeignKey}
+                      />
+                    )),
+                  [
+                    fields,
+                    activeId,
+                    overId,
+                    availableTables,
+                    handleFieldChange,
+                    handleRemoveField,
+                    handleSetForeignKey,
+                    handleRemoveForeignKey,
+                  ]
+                )}
               </TableBody>
             </SortableContext>
           </DndContext>
         </Table>
       </div>
-      <Button
-        type="button"
-        size="sm"
-        onClick={handleAddField}
-        className="flex items-center gap-2"
-      >
+      <Button type="button" size="sm" onClick={handleAddField} className="flex items-center gap-2">
         <Plus className="h-4 w-4" />
         Add Field
       </Button>

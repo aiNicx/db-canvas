@@ -1,20 +1,32 @@
-import { useTables } from "@/hooks/useTables";
-import { useConnections } from "@/hooks/useConnections";
-
+import { useTables } from '@/hooks/useTables';
+import { useConnections } from '@/hooks/useConnections';
 
 export interface Position {
   x: number;
   y: number;
 }
 
-export interface Field {
-  id: string; // Add unique ID
+export type FieldType =
+  | 'INT'
+  | 'VARCHAR'
+  | 'TEXT'
+  | 'DATE'
+  | 'DATETIME'
+  | 'BOOLEAN'
+  | 'DECIMAL'
+  | 'FLOAT'
+  | 'DOUBLE'
+  | 'TIMESTAMP'
+  | 'JSON'
+  | string;
+
+export interface Field<T extends FieldType = FieldType> {
+  id: string;
   name: string;
-  type: string;
+  type: T;
   notNull: boolean;
   primary: boolean;
   unique: boolean;
-  // Allow different types for default value
   defaultValue?: string | number | boolean | null;
   foreignKey?: {
     tableId: string;
@@ -56,7 +68,7 @@ export interface Connection {
   targetId: string;
   sourceField: string;
   targetField: string;
-  relationshipType: "oneToOne" | "oneToMany";
+  relationshipType: 'oneToOne' | 'oneToMany';
 }
 
 export interface Project {
@@ -70,14 +82,13 @@ export interface Project {
   tags?: string[];
 }
 
-export type RelationType = "oneToOne" | "oneToMany";
+export type RelationType = 'oneToOne' | 'oneToMany';
 
 export interface SQLExportOptions {
-  dialect: "mysql" | "postgresql" | "sqlite";
+  dialect: 'mysql' | 'postgresql' | 'sqlite';
   includeDropStatements: boolean;
   includeTimestamps: boolean;
 }
-
 
 // Type for the Project Context
 export interface ProjectContextType {
@@ -91,5 +102,5 @@ export interface ProjectContextType {
   duplicateProject: (id: string) => void;
   // Update function now accepts an updater function for safe state updates
   updateFullProject: (updater: (prevProject: Project | null) => Project) => void;
-  exportProjectSQL: (id: string, dbType: "mysql" | "postgresql" | "sqlite") => string; // Added export function
+  exportProjectSQL: (id: string, dbType: 'mysql' | 'postgresql' | 'sqlite') => string; // Added export function
 }
